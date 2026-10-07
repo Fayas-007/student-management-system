@@ -29,8 +29,16 @@ public class CourseController {
     }
 
     @PostMapping
-    public CourseResponse createCourse(@RequestBody CourseRequest request) {
+    public CourseResponse createCourse(
+            @RequestBody CourseRequest request) {
         return courseService.createCourse(request);
+    }
+
+    @PutMapping("/{id}")
+    public CourseResponse updateCourse(
+            @PathVariable Long id,
+            @RequestBody CourseRequest request) {
+        return courseService.updateCourse(id, request);
     }
 
     @DeleteMapping("/{id}")

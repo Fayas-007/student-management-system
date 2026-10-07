@@ -29,26 +29,113 @@ public class CourseService {
 
         return courseRepository.findAll()
                 .stream()
-                .map(course -> {
-                    CourseResponse response = new CourseResponse();
-
-                    response.setId(course.getId());
-                    response.setDepartmentId(course.getDepartment().getId());
-                    response.setCode(course.getCode());
-                    response.setName(course.getName());
-                    response.setDescription(course.getDescription());
-                    response.setCredits(course.getCredits());
-                    response.setCreatedAt(course.getCreatedAt());
-
-                    return response;
-                })
+                .map(this::toResponse)
                 .toList();
     }
 
     public CourseResponse getCourseById(Long id) {
 
         Course course = courseRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        return toResponse(course);
+    }
+
+    public CourseResponse createCourse(CourseRequest request) {
+
+        validate(request);
+
+        String code = request.getCode().trim().toUpperCase();
+
+        if (courseRepository.findByCode(code).isPresent()) {
+            throw new RuntimeException("Course code already exists");
+        }
+
+        Department department = departmentRepository
+                .findById(request.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+
+        Course course = new Course();
+
+        course.setDepartment(department);
+        course.setCode(code);
+        course.setName(request.getName().trim());
+        course.setDescription(
+                request.getDescription() != null
+                        ? request.getDescription().trim()
+                        : null
+        );
+        course.setCredits(request.getCredits());
+
+        return toResponse(courseRepository.save(course));
+    }
+
+    public CourseResponse updateCourse(Long id, CourseRequest request) {
+
+        validate(request);
+
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        String code = request.getCode().trim().toUpperCase();
+
+        if (!code.equals(course.getCode())) {
+
+            if (courseRepository.findByCode(code).isPresent()) {
+                throw new RuntimeException("Course code already exists");
+            }
+
+            course.setCode(code);
+        }
+
+        Department department = departmentRepository
+                .findById(request.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+
+        course.setDepartment(department);
+        course.setName(request.getName().trim());
+        course.setDescription(
+                request.getDescription() != null
+                        ? request.getDescription().trim()
+                        : null
+        );
+        course.setCredits(request.getCredits());
+
+        return toResponse(courseRepository.save(course));
+    }
+
+    public void deleteCourse(Long id) {
+
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        courseRepository.delete(course);
+    }
+
+    private void validate(CourseRequest request) {
+
+        if (request.getDepartmentId() == null) {
+            throw new RuntimeException("Department is required");
+        }
+
+        if (request.getCode() == null || request.getCode().isBlank()) {
+            throw new RuntimeException("Course code is required");
+        }
+
+        if (request.getName() == null || request.getName().isBlank()) {
+            throw new RuntimeException("Course name is required");
+        }
+
+        if (request.getCredits() == null) {
+            throw new RuntimeException("Credits are required");
+        }
+
+        if (request.getCredits() < 1 || request.getCredits() > 10) {
+            throw new RuntimeException("Credits must be between 1 and 10");
+        }
+    }
+
+    private CourseResponse toResponse(Course course) {
 
         CourseResponse response = new CourseResponse();
 
@@ -61,32 +148,5 @@ public class CourseService {
         response.setCreatedAt(course.getCreatedAt());
 
         return response;
-    }
-
-    public CourseResponse createCourse(CourseRequest request) {
-        Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow();
-
-        Course course = new Course();
-        course.setDepartment(department);
-        course.setName(request.getName());
-        course.setCode(request.getCode());
-        course.setDescription(request.getDescription());
-        course.setCredits(request.getCredits());
-
-        Course savedCourse = courseRepository.save(course);
-
-        CourseResponse response = new CourseResponse();
-        response.setId(savedCourse.getId());
-        response.setDepartmentId(savedCourse.getDepartment().getId());
-        response.setName(savedCourse.getName());
-        response.setCode(savedCourse.getCode());
-        response.setDescription(savedCourse.getDescription());
-        response.setCredits(savedCourse.getCredits());
-        response.setCreatedAt(savedCourse.getCreatedAt());
-        return response;
-    }
-
-    public void deleteCourse(Long id) {
-        courseRepository.deleteById(id);
     }
 }
