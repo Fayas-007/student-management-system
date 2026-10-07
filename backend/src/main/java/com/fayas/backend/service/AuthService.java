@@ -4,7 +4,8 @@ import com.fayas.backend.dto.request.LoginRequest;
 import com.fayas.backend.dto.request.UserRequest;
 import com.fayas.backend.dto.response.LoginResponse;
 import com.fayas.backend.dto.response.UserResponse;
-
+import com.fayas.backend.entity.Student;
+import com.fayas.backend.repository.StudentRepository;
 import com.fayas.backend.entity.User;
 import com.fayas.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,44 +15,59 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     public AuthService(
-        UserRepository userRepository,
-        PasswordEncoder passwordEncoder,
-        JwtService jwtService) {
+    UserRepository userRepository,
+    StudentRepository studentRepository,
+    PasswordEncoder passwordEncoder,
+    JwtService jwtService) {
 
     this.userRepository = userRepository;
+    this.studentRepository = studentRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
 }
-
     public UserResponse register(UserRequest request) {
 
-        User user = new User();
+    User user = new User();
 
-        user.setEmail(request.getEmail());
+    user.setEmail(request.getEmail());
 
-        user.setPasswordHash(
-                passwordEncoder.encode(request.getPassword()));
+    user.setPasswordHash(
+            passwordEncoder.encode(request.getPassword()));
 
-        user.setRole(
-                request.getRole() != null
-                        ? request.getRole()
-                        : "STUDENT");
+    user.setRole(
+            request.getRole() != null
+                    ? request.getRole()
+                    : "STUDENT");
 
-        User savedUser = userRepository.save(user);
+    User savedUser = userRepository.save(user);
 
-        UserResponse response = new UserResponse();
+    // Create student profile for STUDENT users
+    if ("STUDENT".equals(savedUser.getRole())) {
 
-        response.setId(savedUser.getId());
-        response.setEmail(savedUser.getEmail());
-        response.setRole(savedUser.getRole());
-        response.setCreatedAt(savedUser.getCreatedAt());
+        Student student = new Student();
 
-        return response;
+        student.setUser(savedUser);
+        student.setFirstName(request.getFirstName());
+        student.setLastName(request.getLastName());
+        student.setEmail(savedUser.getEmail());
+
+        studentRepository.save(student);
     }
+
+    UserResponse response = new UserResponse();
+
+    response.setId(savedUser.getId());
+    response.setEmail(savedUser.getEmail());
+    response.setRole(savedUser.getRole());
+    response.setCreatedAt(savedUser.getCreatedAt());
+
+    return response;
+}
 
     public LoginResponse login(LoginRequest request) {
 

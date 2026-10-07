@@ -2,6 +2,7 @@ package com.fayas.backend.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.fayas.backend.dto.request.EnrollmentRequest;
@@ -19,13 +20,21 @@ public class EnrollmentController {
     }
 
     @GetMapping
-    public List<EnrollmentResponse> getAllEnrollments() {
-        return enrollmentService.getAllEnrollments();
+    public List<EnrollmentResponse> getEnrollments(
+            Authentication authentication) {
+
+        return enrollmentService.getEnrollmentsForUser(authentication);
     }
 
     @GetMapping("/{id}")
-    public EnrollmentResponse getEnrollmentById(@PathVariable Long id) {
-        return enrollmentService.getEnrollmentById(id);
+    public EnrollmentResponse getEnrollmentById(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        return enrollmentService.getEnrollmentByIdForUser(
+                id,
+                authentication
+        );
     }
 
     @PostMapping

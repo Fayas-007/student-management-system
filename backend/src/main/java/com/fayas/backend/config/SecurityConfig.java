@@ -2,6 +2,7 @@ package com.fayas.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,20 +32,48 @@ public class SecurityConfig {
             .cors(cors -> {})
             .authorizeHttpRequests(auth -> auth
 
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                 .requestMatchers("/api/auth/**").permitAll()
 
+                // Users
                 .requestMatchers("/api/users/**")
                     .hasRole("ADMIN")
 
+                // Departments
                 .requestMatchers("/api/departments/**")
                     .hasAnyRole("ADMIN", "TEACHER")
 
-                .requestMatchers("/api/courses/**")
-                    .hasAnyRole("ADMIN", "TEACHER")
-
-                .requestMatchers("/api/enrollments/**")
+                // Courses
+                .requestMatchers(HttpMethod.GET, "/api/courses/**")
                     .hasAnyRole("ADMIN", "TEACHER", "STUDENT")
 
+                .requestMatchers(HttpMethod.POST, "/api/courses/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+
+                .requestMatchers(HttpMethod.PUT, "/api/courses/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+
+                .requestMatchers(HttpMethod.DELETE, "/api/courses/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+
+                // Enrollments
+                .requestMatchers(HttpMethod.GET, "/api/enrollments/**")
+                    .hasAnyRole("ADMIN", "TEACHER", "STUDENT")
+
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/enrollments",
+                    "/api/enrollments/**"
+                )
+                .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/enrollments/**")
+                    .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.DELETE, "/api/enrollments/**")
+                    .hasRole("ADMIN")
+
+                // Students
                 .requestMatchers("/api/students/**")
                     .hasAnyRole("ADMIN", "TEACHER", "STUDENT")
 

@@ -26,7 +26,7 @@ public class JwtService {
                 .subject(email)
                 .issuedAt(new Date())
                 .expiration(
-                        new Date(System.currentTimeMillis() + 86400000)
+                        new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000)
                 )
                 .signWith(key)
                 .compact();
