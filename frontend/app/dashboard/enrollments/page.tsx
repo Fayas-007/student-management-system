@@ -509,11 +509,7 @@ export default function EnrollmentsPage() {
 
                             </div>
 
-                            <p className="mt-1 text-sm text-[#64748B]">
-                                {isStudent
-                                    ? "Courses assigned to your student account."
-                                    : "Current student-course assignments."}
-                            </p>
+
 
                         </div>
 

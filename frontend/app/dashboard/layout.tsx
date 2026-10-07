@@ -11,6 +11,7 @@ import {
     ClipboardList,
     User,
     LogOut,
+    Building2,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -106,7 +107,9 @@ export default function DashboardLayout({
                     {/* Navigation */}
                     <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
 
-                        <SectionLabel first>Main</SectionLabel>
+                        <SectionLabel first>
+                            Main
+                        </SectionLabel>
 
                         {/* Dashboard */}
                         <Link
@@ -125,13 +128,17 @@ export default function DashboardLayout({
 
                         {!isStudent && (
                             <>
-                                <SectionLabel>Manage</SectionLabel>
+                                <SectionLabel>
+                                    Manage
+                                </SectionLabel>
 
                                 {/* ADMIN ONLY */}
                                 {isAdmin && (
                                     <Link
                                         href="/dashboard/people"
-                                        className={navClass("/dashboard/people")}
+                                        className={navClass(
+                                            "/dashboard/people"
+                                        )}
                                     >
                                         <Users
                                             className={iconClass(
@@ -139,6 +146,23 @@ export default function DashboardLayout({
                                             )}
                                         />
                                         People
+                                    </Link>
+                                )}
+
+                                {/* DEPARTMENTS — ADMIN ONLY */}
+                                {isAdmin && (
+                                    <Link
+                                        href="/dashboard/departments"
+                                        className={navClass(
+                                            "/dashboard/departments"
+                                        )}
+                                    >
+                                        <Building2
+                                            className={iconClass(
+                                                "/dashboard/departments"
+                                            )}
+                                        />
+                                        Departments
                                     </Link>
                                 )}
 
@@ -199,11 +223,15 @@ export default function DashboardLayout({
 
                         {isStudent && (
                             <>
-                                <SectionLabel>My learning</SectionLabel>
+                                <SectionLabel>
+                                    My learning
+                                </SectionLabel>
 
                                 <Link
                                     href="/dashboard/profile"
-                                    className={navClass("/dashboard/profile")}
+                                    className={navClass(
+                                        "/dashboard/profile"
+                                    )}
                                 >
                                     <User
                                         className={iconClass(
@@ -215,7 +243,9 @@ export default function DashboardLayout({
 
                                 <Link
                                     href="/dashboard/courses"
-                                    className={navClass("/dashboard/courses")}
+                                    className={navClass(
+                                        "/dashboard/courses"
+                                    )}
                                 >
                                     <BookOpen
                                         className={iconClass(
@@ -240,7 +270,6 @@ export default function DashboardLayout({
                                 </Link>
                             </>
                         )}
-
                     </nav>
 
                     {/* Bottom */}
@@ -249,6 +278,7 @@ export default function DashboardLayout({
                         <div className="flex items-center gap-3 rounded-lg bg-[#131C2E] px-3 py-2.5">
                             <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB]/20 text-xs font-bold text-[#60A5FA]">
                                 {role.charAt(0)}
+
                                 <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#131C2E] bg-[#22C55E]" />
                             </div>
 
@@ -270,16 +300,13 @@ export default function DashboardLayout({
                             <LogOut className="h-[18px] w-[18px] text-[#64748B] group-hover:text-[#F87171]" />
                             Log out
                         </button>
-
                     </div>
-
                 </aside>
 
                 {/* Content */}
                 <section className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
                     {children}
                 </section>
-
             </div>
         </main>
     );
@@ -301,6 +328,7 @@ function SectionLabel({
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">
                 {children}
             </span>
+
             <span className="h-px flex-1 bg-gradient-to-r from-[#1E293B] to-transparent" />
         </div>
     );

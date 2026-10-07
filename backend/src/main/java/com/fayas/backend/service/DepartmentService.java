@@ -14,35 +14,100 @@ public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
 
-    public DepartmentService(DepartmentRepository departmentRepository) {
+    public DepartmentService(
+            DepartmentRepository departmentRepository) {
+
         this.departmentRepository = departmentRepository;
     }
 
-    // Get all departments
+    // ============================================================
+    // GET ALL
+    // ============================================================
+
     public List<DepartmentResponse> getAllDepartments() {
 
         return departmentRepository.findAll()
                 .stream()
-                .map(department -> {
-                    DepartmentResponse response = new DepartmentResponse();
-
-                    response.setId(department.getId());
-                    response.setName(department.getName());
-                    response.setDescription(department.getDescription());
-                    response.setCreatedAt(department.getCreatedAt());
-
-                    return response;
-                })
+                .map(this::toResponse)
                 .toList();
     }
 
-    // Get one department
+    // ============================================================
+    // GET BY ID
+    // ============================================================
+
     public DepartmentResponse getDepartmentById(Long id) {
 
-        Department department = departmentRepository.findById(id)
-                .orElseThrow();
+        Department department = departmentRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Department not found"));
 
-        DepartmentResponse response = new DepartmentResponse();
+        return toResponse(department);
+    }
+
+    // ============================================================
+    // CREATE
+    // ============================================================
+
+    public DepartmentResponse createDepartment(
+            DepartmentRequest request) {
+
+        Department department = new Department();
+
+        department.setName(request.getName());
+        department.setDescription(request.getDescription());
+
+        Department savedDepartment =
+                departmentRepository.save(department);
+
+        return toResponse(savedDepartment);
+    }
+
+    // ============================================================
+    // UPDATE
+    // ============================================================
+
+    public DepartmentResponse updateDepartment(
+            Long id,
+            DepartmentRequest request) {
+
+        Department department = departmentRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Department not found"));
+
+        department.setName(request.getName());
+        department.setDescription(request.getDescription());
+
+        Department updatedDepartment =
+                departmentRepository.save(department);
+
+        return toResponse(updatedDepartment);
+    }
+
+    // ============================================================
+    // DELETE
+    // ============================================================
+
+    public void deleteDepartment(Long id) {
+
+        if (!departmentRepository.existsById(id)) {
+            throw new RuntimeException("Department not found");
+        }
+
+        departmentRepository.deleteById(id);
+    }
+
+    // ============================================================
+    // RESPONSE MAPPER
+    // ============================================================
+
+    private DepartmentResponse toResponse(
+            Department department) {
+
+        DepartmentResponse response =
+                new DepartmentResponse();
 
         response.setId(department.getId());
         response.setName(department.getName());
@@ -50,30 +115,5 @@ public class DepartmentService {
         response.setCreatedAt(department.getCreatedAt());
 
         return response;
-    }
-
-    // Create department
-    public DepartmentResponse createDepartment(DepartmentRequest request) {
-
-        Department department = new Department();
-
-        department.setName(request.getName());
-        department.setDescription(request.getDescription());
-
-        Department savedDepartment = departmentRepository.save(department);
-
-        DepartmentResponse response = new DepartmentResponse();
-
-        response.setId(savedDepartment.getId());
-        response.setName(savedDepartment.getName());
-        response.setDescription(savedDepartment.getDescription());
-        response.setCreatedAt(savedDepartment.getCreatedAt());
-
-        return response;
-    }
-
-    // Delete department
-    public void deleteDepartment(Long id) {
-        departmentRepository.deleteById(id);
     }
 }

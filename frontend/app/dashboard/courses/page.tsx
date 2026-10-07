@@ -426,14 +426,6 @@ export default function CoursesPage() {
                             <h2 className="text-base font-semibold text-[#111827]">
                                 Course Directory
                             </h2>
-
-                            <p className="mt-1 text-sm text-[#64748B]">
-                                {filteredCourses.length}{" "}
-                                {filteredCourses.length === 1
-                                    ? "course"
-                                    : "courses"}{" "}
-                                found
-                            </p>
                         </div>
                     </div>
                 </div>
