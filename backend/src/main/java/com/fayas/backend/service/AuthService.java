@@ -1,7 +1,10 @@
 package com.fayas.backend.service;
 
+import com.fayas.backend.dto.request.LoginRequest;
 import com.fayas.backend.dto.request.UserRequest;
+import com.fayas.backend.dto.response.LoginResponse;
 import com.fayas.backend.dto.response.UserResponse;
+
 import com.fayas.backend.entity.User;
 import com.fayas.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,14 +15,17 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder
-    ) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        JwtService jwtService) {
+
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtService = jwtService;
+}
 
     public UserResponse register(UserRequest request) {
 
@@ -28,14 +34,12 @@ public class AuthService {
         user.setEmail(request.getEmail());
 
         user.setPasswordHash(
-                passwordEncoder.encode(request.getPassword())
-        );
+                passwordEncoder.encode(request.getPassword()));
 
         user.setRole(
                 request.getRole() != null
                         ? request.getRole()
-                        : "STUDENT"
-        );
+                        : "STUDENT");
 
         User savedUser = userRepository.save(user);
 
@@ -47,5 +51,27 @@ public class AuthService {
         response.setCreatedAt(savedUser.getCreatedAt());
 
         return response;
+    }
+
+    public LoginResponse login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPasswordHash())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        String token = jwtService.generateToken(user.getEmail());
+
+        LoginResponse response = new LoginResponse();
+
+        response.setToken(token);
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+
+        return response;
+
     }
 }
