@@ -38,10 +38,9 @@ export default function DashboardLayout({
 
         return `
             block rounded-xl px-4 py-3 text-sm font-medium transition-all
-            ${
-                active
-                    ? "bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]"
-                    : "text-[#AAB4C5] hover:bg-[#1E293B] hover:text-white"
+            ${active
+                ? "bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]"
+                : "text-[#AAB4C5] hover:bg-[#1E293B] hover:text-white"
             }
         `;
     }
@@ -81,19 +80,34 @@ export default function DashboardLayout({
                             Dashboard
                         </Link>
 
+                        Replace your current ADMIN / TEACHER section with this:
                         {/* =========================
                             ADMIN / TEACHER
                         ========================= */}
 
                         {!isStudent && (
                             <>
-                                <Link
-                                    href="/dashboard/students"
-                                    className={navClass("/dashboard/students")}
-                                >
-                                    Students
-                                </Link>
+                                {/* ADMIN ONLY */}
+                                {isAdmin && (
+                                    <Link
+                                        href="/dashboard/people"
+                                        className={navClass("/dashboard/people")}
+                                    >
+                                        People
+                                    </Link>
+                                )}
 
+                                {/* STUDENTS — TEACHER ONLY */}
+                                {isTeacher && (
+                                    <Link
+                                        href="/dashboard/students"
+                                        className={navClass("/dashboard/students")}
+                                    >
+                                        Students
+                                    </Link>
+                                )}
+
+                                {/* COURSES */}
                                 {(isAdmin || isTeacher) && (
                                     <Link
                                         href="/dashboard/courses"
@@ -103,11 +117,10 @@ export default function DashboardLayout({
                                     </Link>
                                 )}
 
+                                {/* ENROLLMENTS */}
                                 <Link
                                     href="/dashboard/enrollments"
-                                    className={navClass(
-                                        "/dashboard/enrollments"
-                                    )}
+                                    className={navClass("/dashboard/enrollments")}
                                 >
                                     Enrollments
                                 </Link>
