@@ -317,69 +317,72 @@ export default function PeoplePage() {
     // =========================
 
     return (
-        <main className="min-h-full">
+        <main className="mx-auto w-full max-w-[1400px]">
 
             {/* =========================
                 HEADER
             ========================= */}
 
-            <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9A9EA6]">
+            <div className="mb-8 border-b border-[#DCE1E8] pb-6">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-3 py-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
                         Management
-                    </p>
-
-                    <h1 className="text-[30px] font-semibold tracking-[-0.04em] text-[#252832]">
-                        People
-                    </h1>
-
-                    <p className="mt-2 text-sm text-[#8B8E95]">
-                        Manage administrators, teachers, and students.
-                    </p>
+                    </span>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={openCreate}
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1B1C20] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#292A2E]"
-                >
-                    <span className="text-lg leading-none">
-                        +
-                    </span>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h1 className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] sm:text-4xl">
+                            People
+                        </h1>
 
-                    Add person
-                </button>
+                        <p className="mt-2 text-sm text-[#64748B]">
+                            Manage administrators, teachers, and students.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={openCreate}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8]"
+                    >
+                        <span className="text-lg leading-none">+</span>
+                        Add Person
+                    </button>
+                </div>
             </div>
 
             {/* =========================
                 SEARCH / FILTER
             ========================= */}
 
-            <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-[#DDE3EC] bg-[#F8FAFD] p-3 shadow-[0_5px_24px_rgba(15,23,42,0.04)] sm:flex-row">
+            <div className="mb-6 rounded-2xl border border-[#DCE1E8] bg-white p-4 shadow-[0_4px_18px_rgba(15,23,42,0.04)]">
+                <div className="flex flex-col gap-3 md:flex-row">
+                    <div className="relative flex-1">
+                        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]">
+                            ⌕
+                        </span>
 
-                <div className="relative flex-1">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9AA3B1]">
-                        ⌕
-                    </span>
+                        <input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search by name, email or role..."
+                            className="h-11 w-full rounded-xl border border-[#DCE1E8] bg-white pl-10 pr-4 text-sm text-[#111827] outline-none transition placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/5"
+                        />
+                    </div>
 
-                    <input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search name, email, or role..."
-                        className="h-11 w-full rounded-xl border border-[#DCE1E8] bg-white pl-10 pr-4 text-sm text-[#252832] outline-none transition placeholder:text-[#A3A9B3] focus:border-[#8EA8D8] focus:ring-4 focus:ring-[#2563EB]/5"
-                    />
+                    <select
+                        value={roleFilter}
+                        onChange={(e) => setRoleFilter(e.target.value)}
+                        className="h-11 rounded-xl border border-[#DCE1E8] bg-white px-4 text-sm font-medium text-[#334155] outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/5 md:w-52"
+                    >
+                        <option value="ALL">All roles</option>
+                        <option value="STUDENT">Students</option>
+                        <option value="TEACHER">Teachers</option>
+                        <option value="ADMIN">Admins</option>
+                    </select>
                 </div>
-
-                <select
-                    value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
-                    className="h-11 rounded-xl border border-[#DCE1E8] bg-white px-4 text-sm font-medium text-[#45484F] outline-none transition focus:border-[#8EA8D8] focus:ring-4 focus:ring-[#2563EB]/5"
-                >
-                    <option value="ALL">All roles</option>
-                    <option value="STUDENT">Students</option>
-                    <option value="TEACHER">Teachers</option>
-                    <option value="ADMIN">Admins</option>
-                </select>
             </div>
 
             {/* =========================
@@ -387,202 +390,206 @@ export default function PeoplePage() {
             ========================= */}
 
             {error && (
-                <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                    <span className="mt-0.5 font-semibold">
-                        !
-                    </span>
+                <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    <span className="mt-0.5 font-bold">!</span>
 
-                    <span>
-                        {error}
-                    </span>
+                    <span>{error}</span>
                 </div>
             )}
 
-            <div className="overflow-hidden rounded-2xl border border-[#E2E4E8] bg-white shadow-[0_6px_24px_rgba(15,23,42,0.035)]">
-    {loading ? (
-        <div className="flex min-h-[260px] items-center justify-center">
-            <p className="text-sm text-[#8B8E95]">
-                Loading people...
-            </p>
-        </div>
-    ) : filteredUsers.length === 0 ? (
-        <div className="flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F8F9FB] text-[#9CA3AF]">
-                —
-            </div>
+            <div className="overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
 
-            <h3 className="text-sm font-semibold text-[#252832]">
-                No people found
-            </h3>
+                {/* TABLE TITLE */}
+                <div className="border-b border-[#E5E7EB] px-5 py-5">
+                    <h2 className="text-sm font-semibold text-[#111827]">
+                        People Directory
+                    </h2>
+                </div>
 
-            <p className="mt-1 text-sm text-[#92959C]">
-                Try changing your search or filter.
-            </p>
-        </div>
-    ) : (
-        <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left">
+                {loading ? (
+                    <div className="flex min-h-[260px] items-center justify-center">
+                        <p className="text-sm text-[#8B8E95]">
+                            Loading people...
+                        </p>
+                    </div>
+                ) : filteredUsers.length === 0 ? (
 
-                {/* HEADER */}
-                <thead>
-    <tr className="border-b border-[#1E293B] bg-[#111827]">
-        <th className="w-14 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-            #
-        </th>
+                    <div className="flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
+                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F8F9FB] text-[#9CA3AF]">
+                            —
+                        </div>
 
-        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-            Person
-        </th>
+                        <h3 className="text-sm font-semibold text-[#252832]">
+                            No people found
+                        </h3>
 
-        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-            Email
-        </th>
+                        <p className="mt-1 text-sm text-[#92959C]">
+                            Try changing your search or filter.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[900px] text-left">
 
-        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-            Role
-        </th>
+                            {/* HEADER */}
+                            <thead className="bg-[#111827]">
+                                <tr>
+                                    <th className="w-14 px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+                                        #
+                                    </th>
 
-        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-            Joined
-        </th>
+                                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+                                        Person
+                                    </th>
 
-        <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-            Actions
-        </th>
-    </tr>
-</thead>
+                                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+                                        Email
+                                    </th>
 
-                {/* USERS */}
-                <tbody>
-                    {filteredUsers.map((user, index) => (
-                        <tr
-                            key={user.id}
-                            className={`
+                                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+                                        Role
+                                    </th>
+
+                                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+                                        Joined
+                                    </th>
+
+                                    <th className="w-36 px-4 py-3 text-right text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            {/* USERS */}
+                            <tbody>
+                                {filteredUsers.map((user, index) => (
+                                    <tr
+                                        key={user.id}
+                                        className={`
                                 border-b border-[#EEF1F5]
                                 transition-colors
                                 last:border-b-0
                                 hover:bg-[#F5F8FC]
-                                ${
-                                    index % 2 === 1
-                                        ? "bg-[#FCFDFE]"
-                                        : "bg-white"
-                                }
+                                ${index % 2 === 1
+                                                ? "bg-[#FCFDFE]"
+                                                : "bg-white"
+                                            }
                             `}
-                        >
-
-                            {/* NUMBER */}
-                            <td className="px-4 py-3">
-                                <span className="text-[11px] font-semibold tabular-nums text-[#A3A7AF]">
-                                    {String(index + 1).padStart(2, "0")}
-                                </span>
-                            </td>
-
-                            {/* PERSON */}
-                            <td className="px-4 py-3">
-                                <div className="flex items-center gap-2.5">
-
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EEF4FF] text-[10px] font-bold text-[#2563EB]">
-                                        {user.role === "STUDENT"
-                                            ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase()
-                                            : user.email[0]?.toUpperCase()}
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-semibold leading-tight tracking-[-0.01em] text-[#252832]">
-                                            {user.role === "STUDENT"
-                                                ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-                                                : user.email}
-                                        </p>
-
-                                        <p className="mt-0.5 text-[10px] font-medium text-[#A0A4AC]">
-                                            ID #{user.id}
-                                        </p>
-                                    </div>
-
-                                </div>
-                            </td>
-
-                            {/* EMAIL */}
-                            <td className="px-4 py-3">
-                                <span className="text-xs text-[#62666F]">
-                                    {user.email}
-                                </span>
-                            </td>
-
-                            {/* ROLE */}
-                            <td className="px-4 py-3">
-
-                                {user.role === "ADMIN" && (
-                                    <span className="inline-flex rounded-full border border-[#D6D8DC] bg-[#252832] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-white">
-                                        Admin
-                                    </span>
-                                )}
-
-                                {user.role === "TEACHER" && (
-                                    <span className="inline-flex rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-[#2563EB]">
-                                        Teacher
-                                    </span>
-                                )}
-
-                                {user.role === "STUDENT" && (
-                                    <span className="inline-flex rounded-full border border-[#D1D5DB] bg-[#F5F6F7] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-[#555A63]">
-                                        Student
-                                    </span>
-                                )}
-
-                            </td>
-
-                            {/* JOINED */}
-                            <td className="px-4 py-3">
-                                <span className="text-xs text-[#62666F]">
-                                    {user.createdAt
-                                        ? new Date(
-                                              user.createdAt
-                                          ).toLocaleDateString()
-                                        : "—"}
-                                </span>
-                            </td>
-
-                            {/* ACTIONS */}
-                            <td className="px-4 py-3">
-                                <div className="flex justify-end gap-1.5">
-
-                                    <button
-                                        type="button"
-                                        onClick={() => openEdit(user)}
-                                        className="rounded-lg border border-[#D9DCE1] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#45484F] shadow-sm transition hover:border-[#BFC3C9] hover:bg-[#F8F9FA]"
                                     >
-                                        Edit
-                                    </button>
 
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            handleDelete(user)
-                                        }
-                                        disabled={user.role === "ADMIN"}
-                                        className={
-                                            user.role === "ADMIN"
-                                                ? "cursor-not-allowed rounded-lg border border-[#E5E7EB] bg-[#F5F5F5] px-3 py-1.5 text-[11px] font-semibold text-[#B8BBC1]"
-                                                : "rounded-lg border border-red-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50"
-                                        }
-                                    >
-                                        {user.role === "ADMIN"
-                                            ? "Protected"
-                                            : "Delete"}
-                                    </button>
+                                        {/* NUMBER */}
+                                        <td className="px-5 py-4">
+                                            <span className="text-[11px] font-semibold tabular-nums text-[#A3A7AF]">
+                                                {String(index + 1).padStart(2, "0")}
+                                            </span>
+                                        </td>
 
-                                </div>
-                            </td>
+                                        {/* PERSON */}
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-2.5">
 
-                        </tr>
-                    ))}
-                </tbody>
+                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EEF4FF] text-[10px] font-bold text-[#2563EB]">
+                                                    {user.role === "STUDENT"
+                                                        ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase()
+                                                        : user.email[0]?.toUpperCase()}
+                                                </div>
 
-            </table>
-        </div>
-    )}
-</div>
+                                                <div>
+                                                    <p className="text-sm font-semibold leading-tight tracking-[-0.01em] text-[#252832]">
+                                                        {user.role === "STUDENT"
+                                                            ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+                                                            : user.email}
+                                                    </p>
+
+                                                    <p className="mt-0.5 text-[10px] font-medium text-[#A0A4AC]">
+                                                        ID #{user.id}
+                                                    </p>
+                                                </div>
+
+                                            </div>
+                                        </td>
+
+                                        {/* EMAIL */}
+                                        <td className="px-4 py-3">
+                                            <span className="text-xs text-[#62666F]">
+                                                {user.email}
+                                            </span>
+                                        </td>
+
+                                        {/* ROLE */}
+                                        <td className="px-4 py-3">
+
+                                            {user.role === "ADMIN" && (
+                                                <span className="inline-flex rounded-full border border-[#D6D8DC] bg-[#252832] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-white">
+                                                    Admin
+                                                </span>
+                                            )}
+
+                                            {user.role === "TEACHER" && (
+                                                <span className="inline-flex rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-[#2563EB]">
+                                                    Teacher
+                                                </span>
+                                            )}
+
+                                            {user.role === "STUDENT" && (
+                                                <span className="inline-flex rounded-full border border-[#D1D5DB] bg-[#F5F6F7] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-[#555A63]">
+                                                    Student
+                                                </span>
+                                            )}
+
+                                        </td>
+
+                                        {/* JOINED */}
+                                        <td className="px-4 py-3">
+                                            <span className="text-xs text-[#62666F]">
+                                                {user.createdAt
+                                                    ? new Date(
+                                                        user.createdAt
+                                                    ).toLocaleDateString()
+                                                    : "—"}
+                                            </span>
+                                        </td>
+
+                                        {/* ACTIONS */}
+                                        <td className="px-4 py-3">
+                                            <div className="flex justify-end gap-1.5">
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openEdit(user)}
+                                                    className="rounded-lg border border-[#DCE1E8] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#334155] shadow-sm transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                                                >
+                                                    Edit
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleDelete(user)
+                                                    }
+                                                    disabled={user.role === "ADMIN"}
+                                                    className={
+                                                        user.role === "ADMIN"
+                                                            ? "cursor-not-allowed rounded-lg border border-[#E5E7EB] bg-[#F5F5F5] px-3 py-1.5 text-[11px] font-semibold text-[#B8BBC1]"
+                                                            : "rounded-lg border border-red-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50"
+                                                    }
+                                                >
+                                                    {user.role === "ADMIN"
+                                                        ? "Protected"
+                                                        : "Delete"}
+                                                </button>
+
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                ))}
+                            </tbody>
+
+                        </table>
+                    </div>
+                )}
+            </div>
             {/* =========================
                 MODAL
             ========================= */}
@@ -855,7 +862,7 @@ export default function PeoplePage() {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="rounded-xl bg-[#1B1C20] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#292A2E] disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="rounded-xl bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {saving
                                         ? "Saving..."

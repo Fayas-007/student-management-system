@@ -222,43 +222,32 @@ function DashboardSkeleton() {
    PAGE HEADER
 ========================================================= */
 
-function PageHeader({
-    email,
-    role,
-}: {
-    email: string;
-    role: string;
-}) {
+function PageHeader({ email, role }: { email: string; role: string }) {
     return (
-        <header className="flex flex-col justify-between gap-4 border-b border-[#E2E8F0] pb-6 sm:flex-row sm:items-end">
+        <div className="mb-8 border-b border-[#DCE1E8] pb-6">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-3 py-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
 
-            <div className="min-w-0">
-                <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[#0F172A] sm:text-[34px]">
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
+                    Management
+                </span>
+            </div>
+
+            <div>
+                <h1 className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] sm:text-4xl">
                     Dashboard
                 </h1>
 
-                <p className="mt-1.5 truncate text-sm text-[#64748B]">
+                <p className="mt-2 text-sm text-[#64748B]">
                     Welcome back,{" "}
                     <span className="font-medium text-[#334155]">
                         {email}
                     </span>
                 </p>
             </div>
-
-            <div className="flex w-fit items-center gap-2.5 rounded-full border border-[#E2E8F0] bg-white py-1.5 pl-2 pr-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#172033] text-[11px] font-bold text-white">
-                    {role.charAt(0)}
-                </span>
-
-                <span className="text-xs font-semibold tracking-wide text-[#334155]">
-                    {role}
-                </span>
-            </div>
-
-        </header>
+        </div>
     );
 }
-
 
 /* =========================================================
    STUDENT DASHBOARD
@@ -572,7 +561,7 @@ function AdminDashboard({
     );
 
     return (
-        <div className="mx-auto w-full max-w-[1600px]">
+       <div className="mx-auto w-full max-w-[1400px] px-8 py-3">
 
             <PageHeader email={email} role={role} />
 
