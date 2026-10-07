@@ -2,6 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import {
+    Users,
+    GraduationCap,
+    Briefcase,
+    ShieldCheck,
+    BookOpen,
+    ClipboardList,
+    User as UserIcon,
+    ArrowUpRight,
+    type LucideIcon,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import type { Student, Course, Enrollment } from "@/lib/types";
 
@@ -16,6 +27,48 @@ type MonthlyData = {
     month: string;
     count: number;
 };
+
+type Accent = "blue" | "teal" | "coral" | "violet" | "navy";
+
+/* Shared accent tokens (visual only) */
+const ACCENTS: Record<
+    Accent,
+    { chip: string; dot: string; fill: string; text: string }
+> = {
+    blue: {
+        chip: "bg-[#EFF6FF] text-[#2563EB]",
+        dot: "bg-[#2563EB]",
+        fill: "#2563EB",
+        text: "text-[#1D4ED8]",
+    },
+    teal: {
+        chip: "bg-[#ECFDF8] text-[#0F9D8A]",
+        dot: "bg-[#0F9D8A]",
+        fill: "#0F9D8A",
+        text: "text-[#087F70]",
+    },
+    coral: {
+        chip: "bg-[#FFF1ED] text-[#E45D46]",
+        dot: "bg-[#F9735B]",
+        fill: "#F9735B",
+        text: "text-[#E45D46]",
+    },
+    violet: {
+        chip: "bg-[#F5F3FF] text-[#7C3AED]",
+        dot: "bg-[#7C3AED]",
+        fill: "#7C3AED",
+        text: "text-[#7C3AED]",
+    },
+    navy: {
+        chip: "bg-[#EEF1F5] text-[#172033]",
+        dot: "bg-[#172033]",
+        fill: "#172033",
+        text: "text-[#172033]",
+    },
+};
+
+const CARD =
+    "rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]";
 
 export default function DashboardPage() {
     const [email, setEmail] = useState("");
@@ -107,24 +160,8 @@ export default function DashboardPage() {
         loadDashboard();
     }, []);
 
-    /*
-     * =========================================================
-     * STUDENT DASHBOARD
-     * =========================================================
-     */
-
     if (loading) {
-        return (
-            <div className="flex min-h-[70vh] items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#DCE1E8] border-t-[#2563EB]" />
-
-                    <p className="text-sm font-medium text-[#64748B]">
-                        Loading dashboard...
-                    </p>
-                </div>
-            </div>
-        );
+        return <DashboardSkeleton />;
     }
 
     if (role === "STUDENT") {
@@ -137,12 +174,6 @@ export default function DashboardPage() {
         );
     }
 
-    /*
-     * =========================================================
-     * ADMIN / TEACHER DASHBOARD
-     * =========================================================
-     */
-
     return (
         <AdminDashboard
             email={email}
@@ -152,6 +183,79 @@ export default function DashboardPage() {
             courses={courses}
             enrollments={enrollments}
         />
+    );
+}
+
+
+/* =========================================================
+   LOADING SKELETON
+========================================================= */
+
+function DashboardSkeleton() {
+    return (
+        <div
+            className="mx-auto w-full max-w-[1600px] animate-pulse"
+            aria-busy="true"
+            aria-label="Loading dashboard"
+        >
+            <div className="border-b border-[#E2E8F0] pb-6">
+                <div className="h-8 w-48 rounded-lg bg-[#E2E8F0]" />
+                <div className="mt-3 h-4 w-64 rounded-md bg-[#E8ECF2]" />
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {[0, 1, 2, 3].map((i) => (
+                    <div key={i} className="h-[124px] rounded-2xl bg-[#E8ECF2]" />
+                ))}
+            </div>
+
+            <div className="mt-3 grid gap-3 xl:grid-cols-[1.55fr_1fr]">
+                <div className="h-[340px] rounded-2xl bg-[#E8ECF2]" />
+                <div className="h-[340px] rounded-2xl bg-[#E8ECF2]" />
+            </div>
+        </div>
+    );
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+function PageHeader({
+    email,
+    role,
+}: {
+    email: string;
+    role: string;
+}) {
+    return (
+        <header className="flex flex-col justify-between gap-4 border-b border-[#E2E8F0] pb-6 sm:flex-row sm:items-end">
+
+            <div className="min-w-0">
+                <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[#0F172A] sm:text-[34px]">
+                    Dashboard
+                </h1>
+
+                <p className="mt-1.5 truncate text-sm text-[#64748B]">
+                    Welcome back,{" "}
+                    <span className="font-medium text-[#334155]">
+                        {email}
+                    </span>
+                </p>
+            </div>
+
+            <div className="flex w-fit items-center gap-2.5 rounded-full border border-[#E2E8F0] bg-white py-1.5 pl-2 pr-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#172033] text-[11px] font-bold text-white">
+                    {role.charAt(0)}
+                </span>
+
+                <span className="text-xs font-semibold tracking-wide text-[#334155]">
+                    {role}
+                </span>
+            </div>
+
+        </header>
     );
 }
 
@@ -172,73 +276,34 @@ function StudentDashboard({
     return (
         <div className="mx-auto w-full max-w-[1600px]">
 
-            {/* Header */}
-            <header className="flex flex-col justify-between gap-5 border-b border-[#DCE1E8] pb-6 sm:flex-row sm:items-end">
-
-                <div>
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-3 py-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
-
-                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
-                            Student Portal
-                        </span>
-                    </div>
-
-                    <h1 className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] sm:text-4xl">
-                        Dashboard
-                    </h1>
-
-                    <p className="mt-2 text-sm text-[#64748B]">
-                        Welcome back, {email}
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-[#DCE1E8] bg-white px-4 py-3 shadow-[0_3px_12px_rgba(15,23,42,0.04)]">
-
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-xs font-bold text-white">
-                        S
-                    </div>
-
-                    <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">
-                            Signed in as
-                        </p>
-
-                        <p className="mt-0.5 text-sm font-semibold text-[#111827]">
-                            STUDENT
-                        </p>
-                    </div>
-
-                </div>
-
-            </header>
+            <PageHeader email={email} role="STUDENT" />
 
 
             {/* Main Student Metrics */}
             <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 
                 <StudentMetricCard
-                    label="Available Courses"
+                    label="Available courses"
                     value={courses.length}
                     description="Courses available in the system"
                     accent="blue"
-                    icon="C"
+                    icon={BookOpen}
                 />
 
                 <StudentMetricCard
-                    label="My Enrollments"
+                    label="My enrollments"
                     value={enrollments.length}
                     description="Your enrollment records"
                     accent="teal"
-                    icon="E"
+                    icon={ClipboardList}
                 />
 
                 <StudentMetricCard
-                    label="Current Role"
+                    label="Current role"
                     valueLabel="STUDENT"
                     description="Your account role"
                     accent="coral"
-                    icon="S"
+                    icon={GraduationCap}
                 />
 
             </section>
@@ -247,117 +312,74 @@ function StudentDashboard({
             {/* Student Actions */}
             <section className="mt-3 grid gap-3 lg:grid-cols-3">
 
-                <Link
+                <ActionCard
                     href="/dashboard/profile"
-                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-6 shadow-[0_4px_18px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
-                >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
-                        P
-                    </div>
+                    title="My Profile"
+                    description="View and manage your student profile."
+                    cta="View profile"
+                    accent="blue"
+                    icon={UserIcon}
+                />
 
-                    <h2 className="mt-5 text-base font-semibold text-[#111827]">
-                        My Profile
-                    </h2>
-
-                    <p className="mt-1 text-sm leading-6 text-[#64748B]">
-                        View and manage your student profile.
-                    </p>
-
-                    <span className="mt-5 inline-block text-xs font-semibold text-[#2563EB]">
-                        View profile →
-                    </span>
-                </Link>
-
-
-                <Link
+                <ActionCard
                     href="/dashboard/courses"
-                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-6 shadow-[0_4px_18px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
-                >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#ECFDF8] text-sm font-bold text-[#0F9D8A]">
-                        C
-                    </div>
+                    title="My Courses"
+                    description="Browse available courses and manage your courses."
+                    cta="View courses"
+                    accent="teal"
+                    icon={BookOpen}
+                />
 
-                    <h2 className="mt-5 text-base font-semibold text-[#111827]">
-                        My Courses
-                    </h2>
-
-                    <p className="mt-1 text-sm leading-6 text-[#64748B]">
-                        Browse available courses and manage your courses.
-                    </p>
-
-                    <span className="mt-5 inline-block text-xs font-semibold text-[#087F70]">
-                        View courses →
-                    </span>
-                </Link>
-
-
-                <Link
+                <ActionCard
                     href="/dashboard/enrollments"
-                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-6 shadow-[0_4px_18px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
-                >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#FFF1ED] text-sm font-bold text-[#E45D46]">
-                        E
-                    </div>
-
-                    <h2 className="mt-5 text-base font-semibold text-[#111827]">
-                        My Enrollments
-                    </h2>
-
-                    <p className="mt-1 text-sm leading-6 text-[#64748B]">
-                        View your course enrollments and grades.
-                    </p>
-
-                    <span className="mt-5 inline-block text-xs font-semibold text-[#E45D46]">
-                        View enrollments →
-                    </span>
-                </Link>
+                    title="My Enrollments"
+                    description="View your course enrollments and grades."
+                    cta="View enrollments"
+                    accent="coral"
+                    icon={ClipboardList}
+                />
 
             </section>
 
 
             {/* Student Overview */}
-            <section className="mt-3 rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_4px_18px_rgba(15,23,42,0.045)] sm:p-6">
+            <section className={`${CARD} mt-3 p-5 sm:p-6`}>
 
-                <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-[#2563EB]" />
-
-                    <h2 className="text-base font-semibold text-[#111827]">
-                        Student Overview
-                    </h2>
-                </div>
+                <h2 className="text-base font-semibold text-[#0F172A]">
+                    Student overview
+                </h2>
 
                 <p className="mt-1 text-sm text-[#64748B]">
                     Your academic information will appear here as you enroll
                     in courses.
                 </p>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
 
-                    <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+                    <div className="rounded-xl bg-[#F8FAFC] p-5 ring-1 ring-inset ring-[#E2E8F0]">
+                        <p className="text-xs font-medium text-[#64748B]">
                             Enrollments
                         </p>
 
-                        <p className="mt-2 text-2xl font-semibold text-[#111827]">
+                        <p className="mt-2 text-2xl font-semibold tabular-nums text-[#0F172A]">
                             {enrollments.length}
                         </p>
 
-                        <p className="mt-1 text-xs text-[#64748B]">
+                        <p className="mt-1 text-xs text-[#94A3B8]">
                             Total courses enrolled
                         </p>
                     </div>
 
-
-                    <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+                    <div className="rounded-xl bg-[#F8FAFC] p-5 ring-1 ring-inset ring-[#E2E8F0]">
+                        <p className="text-xs font-medium text-[#64748B]">
                             Courses
                         </p>
 
-                        <p className="mt-2 text-2xl font-semibold text-[#111827]">
+                        <p className="mt-2 text-2xl font-semibold tabular-nums text-[#0F172A]">
                             {courses.length}
                         </p>
 
-                        <p className="mt-1 text-xs text-[#64748B]">
+                        <p className="mt-1 text-xs text-[#94A3B8]">
                             Available courses
                         </p>
                     </div>
@@ -372,6 +394,58 @@ function StudentDashboard({
 
 
 /* =========================================================
+   ACTION CARD (student quick links)
+========================================================= */
+
+function ActionCard({
+    href,
+    title,
+    description,
+    cta,
+    accent,
+    icon: Icon,
+}: {
+    href: string;
+    title: string;
+    description: string;
+    cta: string;
+    accent: Accent;
+    icon: LucideIcon;
+}) {
+    return (
+        <Link
+            href={href}
+            className={`${CARD} group flex flex-col p-6 transition-colors hover:border-[#CBD5E1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563EB]`}
+        >
+            <div className="flex items-start justify-between">
+                <span
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${ACCENTS[accent].chip}`}
+                >
+                    <Icon className="h-5 w-5" strokeWidth={2} />
+                </span>
+
+                <ArrowUpRight className="h-4 w-4 text-[#CBD5E1] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#64748B]" />
+            </div>
+
+            <h2 className="mt-5 text-base font-semibold text-[#0F172A]">
+                {title}
+            </h2>
+
+            <p className="mt-1 text-sm leading-6 text-[#64748B]">
+                {description}
+            </p>
+
+            <span
+                className={`mt-5 text-xs font-semibold ${ACCENTS[accent].text}`}
+            >
+                {cta}
+            </span>
+        </Link>
+    );
+}
+
+
+/* =========================================================
    STUDENT METRIC CARD
 ========================================================= */
 
@@ -381,60 +455,37 @@ function StudentMetricCard({
     valueLabel,
     description,
     accent,
-    icon,
+    icon: Icon,
 }: {
     label: string;
     value?: number;
     valueLabel?: string;
     description: string;
     accent: "blue" | "teal" | "coral";
-    icon: string;
+    icon: LucideIcon;
 }) {
-    const styles = {
-        blue: {
-            bar: "bg-[#2563EB]",
-            icon: "bg-[#EFF6FF] text-[#2563EB]",
-        },
-        teal: {
-            bar: "bg-[#0F9D8A]",
-            icon: "bg-[#ECFDF8] text-[#0F9D8A]",
-        },
-        coral: {
-            bar: "bg-[#F9735B]",
-            icon: "bg-[#FFF1ED] text-[#E45D46]",
-        },
-    };
-
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_4px_18px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+        <div className={`${CARD} p-5`}>
 
-            <div
-                className={`absolute left-0 top-0 h-full w-1 ${styles[accent].bar}`}
-            />
+            <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-[#64748B]">
+                    {label}
+                </p>
 
-            <div className="flex items-start justify-between">
-
-                <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#64748B]">
-                        {label}
-                    </p>
-
-                    <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#111827]">
-                        {valueLabel ?? value}
-                    </p>
-
-                    <p className="mt-1 text-xs text-[#64748B]">
-                        {description}
-                    </p>
-                </div>
-
-                <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl text-xs font-bold ${styles[accent].icon}`}
+                <span
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${ACCENTS[accent].chip}`}
                 >
-                    {icon}
-                </div>
-
+                    <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                </span>
             </div>
+
+            <p className="mt-4 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-[#0F172A]">
+                {valueLabel ?? value}
+            </p>
+
+            <p className="mt-1 text-xs text-[#94A3B8]">
+                {description}
+            </p>
 
         </div>
     );
@@ -523,49 +574,7 @@ function AdminDashboard({
     return (
         <div className="mx-auto w-full max-w-[1600px]">
 
-            {/* =========================
-                HEADER
-            ========================= */}
-
-            <header className="flex flex-col justify-between gap-5 border-b border-[#DCE1E8] pb-6 sm:flex-row sm:items-end">
-
-                <div>
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-3 py-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
-
-                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
-                            Overview
-                        </span>
-                    </div>
-
-                    <h1 className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] sm:text-4xl">
-                        Dashboard
-                    </h1>
-
-                    <p className="mt-2 text-sm text-[#64748B]">
-                        Welcome back, {email}
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-[#DCE1E8] bg-white px-4 py-3 shadow-[0_3px_12px_rgba(15,23,42,0.04)]">
-
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#172033] text-xs font-bold text-white">
-                        {role.charAt(0)}
-                    </div>
-
-                    <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">
-                            Signed in as
-                        </p>
-
-                        <p className="mt-0.5 text-sm font-semibold text-[#111827]">
-                            {role}
-                        </p>
-                    </div>
-
-                </div>
-
-            </header>
+            <PageHeader email={email} role={role} />
 
 
             {/* =========================
@@ -579,7 +588,7 @@ function AdminDashboard({
                     value={users.length}
                     description="Registered accounts"
                     accent="blue"
-                    icon="U"
+                    icon={Users}
                 />
 
                 <MetricCard
@@ -587,7 +596,7 @@ function AdminDashboard({
                     value={studentCount}
                     description="Student profiles"
                     accent="coral"
-                    icon="S"
+                    icon={GraduationCap}
                 />
 
                 <MetricCard
@@ -595,7 +604,7 @@ function AdminDashboard({
                     value={teacherCount}
                     description="Teacher accounts"
                     accent="violet"
-                    icon="T"
+                    icon={Briefcase}
                 />
 
                 <MetricCard
@@ -603,7 +612,7 @@ function AdminDashboard({
                     value={adminCount}
                     description="Admin accounts"
                     accent="navy"
-                    icon="A"
+                    icon={ShieldCheck}
                 />
 
             </section>
@@ -619,7 +628,7 @@ function AdminDashboard({
                     label="Courses"
                     value={courses.length}
                     description="Available courses"
-                    icon="C"
+                    icon={BookOpen}
                     iconStyle="teal"
                 />
 
@@ -627,7 +636,7 @@ function AdminDashboard({
                     label="Enrollments"
                     value={enrollments.length}
                     description="Total enrollment records"
-                    icon="E"
+                    icon={ClipboardList}
                     iconStyle="blue"
                 />
 
@@ -642,27 +651,21 @@ function AdminDashboard({
 
                 {/* Enrollment Activity */}
 
-                <div className="rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_4px_18px_rgba(15,23,42,0.045)] sm:p-6">
+                <div className={`${CARD} p-5 sm:p-6`}>
 
                     <div className="flex items-start justify-between gap-4">
 
                         <div>
-                            <div className="flex items-center gap-2">
-
-                                <span className="h-2 w-2 rounded-full bg-[#0F9D8A]" />
-
-                                <h2 className="text-base font-semibold text-[#111827]">
-                                    Enrollment activity
-                                </h2>
-
-                            </div>
+                            <h2 className="text-base font-semibold text-[#0F172A]">
+                                Enrollment activity
+                            </h2>
 
                             <p className="mt-1 text-sm text-[#64748B]">
                                 Enrollment growth over time
                             </p>
                         </div>
 
-                        <span className="rounded-full bg-[#ECFDF8] px-3 py-1.5 text-[11px] font-semibold text-[#087F70]">
+                        <span className="rounded-full bg-[#F1F5F9] px-3 py-1 text-[11px] font-semibold text-[#475569]">
                             Monthly
                         </span>
 
@@ -671,13 +674,13 @@ function AdminDashboard({
 
                     {enrollmentData.length === 0 ? (
 
-                        <div className="mt-6 flex min-h-[230px] flex-col items-center justify-center rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-5 text-center">
+                        <div className="mt-6 flex min-h-[240px] flex-col items-center justify-center rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-5 text-center">
 
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ECFDF8] text-sm font-bold text-[#0F9D8A]">
-                                E
-                            </div>
+                            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ECFDF8] text-[#0F9D8A]">
+                                <ClipboardList className="h-5 w-5" />
+                            </span>
 
-                            <p className="mt-4 text-sm font-semibold text-[#111827]">
+                            <p className="mt-4 text-sm font-semibold text-[#0F172A]">
                                 No enrollment activity yet
                             </p>
 
@@ -699,34 +702,26 @@ function AdminDashboard({
 
                 {/* User Distribution */}
 
-                <div className="rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_4px_18px_rgba(15,23,42,0.045)] sm:p-6">
+                <div className={`${CARD} p-5 sm:p-6`}>
 
-                    <div className="flex items-start justify-between">
+                    <div>
+                        <h2 className="text-base font-semibold text-[#0F172A]">
+                            User distribution
+                        </h2>
 
-                        <div>
-                            <h2 className="text-base font-semibold text-[#111827]">
-                                User distribution
-                            </h2>
-
-                            <p className="mt-1 text-sm text-[#64748B]">
-                                Breakdown of registered accounts
-                            </p>
-                        </div>
-
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F5F3FF] text-xs font-bold text-[#7C3AED]">
-                            %
-                        </div>
-
+                        <p className="mt-1 text-sm text-[#64748B]">
+                            Breakdown of registered accounts
+                        </p>
                     </div>
 
 
                     {/* Distribution bar */}
 
-                    <div className="mt-7 flex h-3 overflow-hidden rounded-full bg-[#E2E8F0]">
+                    <div className="mt-7 flex h-2.5 gap-1 overflow-hidden rounded-full bg-[#F1F5F9]">
 
                         {studentCount > 0 && (
                             <div
-                                className="bg-[#F9735B]"
+                                className="rounded-full bg-[#F9735B]"
                                 style={{
                                     width: `${studentPercentage}%`,
                                 }}
@@ -735,7 +730,7 @@ function AdminDashboard({
 
                         {teacherCount > 0 && (
                             <div
-                                className="bg-[#7C3AED]"
+                                className="rounded-full bg-[#7C3AED]"
                                 style={{
                                     width: `${teacherPercentage}%`,
                                 }}
@@ -744,7 +739,7 @@ function AdminDashboard({
 
                         {adminCount > 0 && (
                             <div
-                                className="bg-[#172033]"
+                                className="rounded-full bg-[#172033]"
                                 style={{
                                     width: `${adminPercentage}%`,
                                 }}
@@ -756,7 +751,7 @@ function AdminDashboard({
 
                     {/* Distribution rows */}
 
-                    <div className="mt-7 space-y-4">
+                    <div className="mt-6 divide-y divide-[#F1F5F9]">
 
                         <DistributionRow
                             label="Students"
@@ -787,34 +782,6 @@ function AdminDashboard({
                 </div>
 
             </section>
-
-
-            {/* =========================
-                SUMMARY STRIP
-            ========================= */}
-
-            <section className="mt-3 grid gap-3 sm:grid-cols-3">
-
-                <SummaryItem
-                    label="Student accounts"
-                    value={studentCount}
-                    accent="coral"
-                />
-
-                <SummaryItem
-                    label="Available courses"
-                    value={courses.length}
-                    accent="teal"
-                />
-
-                <SummaryItem
-                    label="Enrollments"
-                    value={enrollments.length}
-                    accent="blue"
-                />
-
-            </section>
-
         </div>
     );
 }
@@ -829,63 +796,36 @@ function MetricCard({
     value,
     description,
     accent,
-    icon,
+    icon: Icon,
 }: {
     label: string;
     value: number;
     description: string;
     accent: "blue" | "coral" | "violet" | "navy";
-    icon: string;
+    icon: LucideIcon;
 }) {
-    const styles = {
-        blue: {
-            bar: "bg-[#2563EB]",
-            icon: "bg-[#EFF6FF] text-[#2563EB]",
-        },
-        coral: {
-            bar: "bg-[#F9735B]",
-            icon: "bg-[#FFF1ED] text-[#E45D46]",
-        },
-        violet: {
-            bar: "bg-[#7C3AED]",
-            icon: "bg-[#F5F3FF] text-[#7C3AED]",
-        },
-        navy: {
-            bar: "bg-[#172033]",
-            icon: "bg-[#EEF1F5] text-[#172033]",
-        },
-    };
-
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_4px_18px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+        <div className={`${CARD} p-5`}>
 
-            <div
-                className={`absolute left-0 top-0 h-full w-1 ${styles[accent].bar}`}
-            />
+            <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-[#64748B]">
+                    {label}
+                </p>
 
-            <div className="flex items-start justify-between">
-
-                <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#64748B]">
-                        {label}
-                    </p>
-
-                    <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#111827]">
-                        {value}
-                    </p>
-
-                    <p className="mt-1 text-xs text-[#64748B]">
-                        {description}
-                    </p>
-                </div>
-
-                <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl text-xs font-bold ${styles[accent].icon}`}
+                <span
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${ACCENTS[accent].chip}`}
                 >
-                    {icon}
-                </div>
-
+                    <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                </span>
             </div>
+
+            <p className="mt-4 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-[#0F172A]">
+                {value}
+            </p>
+
+            <p className="mt-1 text-xs text-[#94A3B8]">
+                {description}
+            </p>
 
         </div>
     );
@@ -900,56 +840,37 @@ function InfoCard({
     label,
     value,
     description,
-    icon,
+    icon: Icon,
     iconStyle,
 }: {
     label: string;
     value: number;
     description: string;
-    icon: string;
+    icon: LucideIcon;
     iconStyle: "teal" | "blue";
 }) {
-    const styles = {
-        teal: {
-            icon: "bg-[#ECFDF8] text-[#0F9D8A]",
-            bar: "bg-[#0F9D8A]",
-        },
-        blue: {
-            icon: "bg-[#EFF6FF] text-[#2563EB]",
-            bar: "bg-[#2563EB]",
-        },
-    };
-
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_4px_18px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)] sm:p-6">
+        <div className={`${CARD} flex items-center gap-5 p-5 sm:p-6`}>
 
-            <div
-                className={`absolute left-0 top-0 h-full w-1 ${styles[iconStyle].bar}`}
-            />
+            <span
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${ACCENTS[iconStyle].chip}`}
+            >
+                <Icon className="h-5 w-5" strokeWidth={2} />
+            </span>
 
-            <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-[#64748B]">
+                    {label}
+                </p>
 
-                <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#64748B]">
-                        {label}
-                    </p>
-
-                    <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#111827]">
-                        {value}
-                    </p>
-
-                    <p className="mt-1 text-sm text-[#64748B]">
-                        {description}
-                    </p>
-                </div>
-
-                <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold ${styles[iconStyle].icon}`}
-                >
-                    {icon}
-                </div>
-
+                <p className="mt-0.5 text-xs text-[#94A3B8]">
+                    {description}
+                </p>
             </div>
+
+            <p className="text-3xl font-semibold tabular-nums tracking-[-0.03em] text-[#0F172A]">
+                {value}
+            </p>
 
         </div>
     );
@@ -973,25 +894,13 @@ function DistributionRow({
     dot: "coral" | "violet" | "navy";
     background: "coral" | "violet" | "navy";
 }) {
-    const dotClass = {
-        coral: "bg-[#F9735B]",
-        violet: "bg-[#7C3AED]",
-        navy: "bg-[#172033]",
-    };
-
-    const badgeClass = {
-        coral: "bg-[#FFF1ED] text-[#E45D46]",
-        violet: "bg-[#F5F3FF] text-[#7C3AED]",
-        navy: "bg-[#EEF1F5] text-[#172033]",
-    };
-
     return (
-        <div className="flex items-center justify-between rounded-xl px-3 py-2.5 transition hover:bg-[#F8FAFC]">
+        <div className="flex items-center justify-between py-3">
 
             <div className="flex items-center gap-3">
 
                 <span
-                    className={`h-2.5 w-2.5 rounded-full ${dotClass[dot]}`}
+                    className={`h-2.5 w-2.5 rounded-full ${ACCENTS[dot].dot}`}
                 />
 
                 <span className="text-sm font-medium text-[#334155]">
@@ -1003,12 +912,12 @@ function DistributionRow({
             <div className="flex items-center gap-3">
 
                 <span
-                    className={`rounded-lg px-2 py-1 text-xs font-bold ${badgeClass[background]}`}
+                    className={`min-w-[2rem] rounded-md px-2 py-1 text-center text-xs font-bold tabular-nums ${ACCENTS[background].chip}`}
                 >
                     {value}
                 </span>
 
-                <span className="w-10 text-right text-xs font-medium text-[#64748B]">
+                <span className="w-10 text-right text-xs font-medium tabular-nums text-[#64748B]">
                     {percentage}%
                 </span>
 
@@ -1032,45 +941,26 @@ function SummaryItem({
     value: number;
     accent: "coral" | "teal" | "blue";
 }) {
-    const styles = {
-        coral: {
-            dot: "bg-[#F9735B]",
-            value: "text-[#E45D46]",
-        },
-        teal: {
-            dot: "bg-[#0F9D8A]",
-            value: "text-[#087F70]",
-        },
-        blue: {
-            dot: "bg-[#2563EB]",
-            value: "text-[#1D4ED8]",
-        },
-    };
-
     return (
-        <div className="rounded-2xl border border-[#DCE1E8] bg-white px-5 py-4 shadow-[0_3px_14px_rgba(15,23,42,0.03)]">
+        <div className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-white px-5 py-3.5">
 
-            <div className="flex items-center justify-between">
-
-                <div className="flex items-center gap-2.5">
-
-                    <span
-                        className={`h-2 w-2 rounded-full ${styles[accent].dot}`}
-                    />
-
-                    <span className="text-xs font-medium text-[#64748B]">
-                        {label}
-                    </span>
-
-                </div>
+            <div className="flex items-center gap-2.5">
 
                 <span
-                    className={`text-lg font-bold ${styles[accent].value}`}
-                >
-                    {value}
+                    className={`h-2 w-2 rounded-full ${ACCENTS[accent].dot}`}
+                />
+
+                <span className="text-xs font-medium text-[#64748B]">
+                    {label}
                 </span>
 
             </div>
+
+            <span
+                className={`text-lg font-semibold tabular-nums ${ACCENTS[accent].text}`}
+            >
+                {value}
+            </span>
 
         </div>
     );
@@ -1087,9 +977,15 @@ function EnrollmentChart({
     data: MonthlyData[];
 }) {
     const width = 700;
-    const height = 240;
-    const paddingX = 35;
-    const paddingY = 25;
+    const height = 260;
+    const paddingLeft = 36;
+    const paddingRight = 24;
+    const paddingTop = 28;
+    const paddingBottom = 32;
+
+    const innerWidth = width - paddingLeft - paddingRight;
+    const innerHeight = height - paddingTop - paddingBottom;
+    const baseline = paddingTop + innerHeight;
 
     const max = Math.max(
         ...data.map((item) => item.count),
@@ -1099,16 +995,11 @@ function EnrollmentChart({
     const points = data.map((item, index) => {
         const x =
             data.length === 1
-                ? width / 2
-                : paddingX +
-                  (index / (data.length - 1)) *
-                      (width - paddingX * 2);
+                ? paddingLeft + innerWidth / 2
+                : paddingLeft +
+                  (index / (data.length - 1)) * innerWidth;
 
-        const y =
-            height -
-            paddingY -
-            (item.count / max) *
-                (height - paddingY * 2);
+        const y = baseline - (item.count / max) * innerHeight;
 
         return {
             x,
@@ -1125,35 +1016,79 @@ function EnrollmentChart({
         )
         .join(" ");
 
+    const areaPath = `${path} L ${points[points.length - 1].x} ${baseline} L ${points[0].x} ${baseline} Z`;
+
     return (
         <div className="mt-6">
 
             <svg
                 viewBox={`0 0 ${width} ${height}`}
-                className="h-[230px] w-full"
-                preserveAspectRatio="none"
+                className="h-auto w-full"
+                role="img"
+                aria-label="Monthly enrollment activity"
             >
 
-                {/* Grid */}
+                <defs>
+                    <linearGradient
+                        id="enrollmentFill"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                    >
+                        <stop
+                            offset="0%"
+                            stopColor="#0F9D8A"
+                            stopOpacity="0.18"
+                        />
+                        <stop
+                            offset="100%"
+                            stopColor="#0F9D8A"
+                            stopOpacity="0"
+                        />
+                    </linearGradient>
+                </defs>
+
+
+                {/* Grid + y-axis labels */}
 
                 {[0, 1, 2, 3].map((line) => {
                     const y =
-                        paddingY +
-                        (line / 3) *
-                            (height - paddingY * 2);
+                        paddingTop + (line / 3) * innerHeight;
 
                     return (
-                        <line
-                            key={line}
-                            x1={paddingX}
-                            x2={width - paddingX}
-                            y1={y}
-                            y2={y}
-                            stroke="#E2E8F0"
-                            strokeWidth="1"
-                        />
+                        <g key={line}>
+                            <line
+                                x1={paddingLeft}
+                                x2={width - paddingRight}
+                                y1={y}
+                                y2={y}
+                                stroke="#E2E8F0"
+                                strokeWidth="1"
+                                strokeDasharray={
+                                    line === 3 ? undefined : "4 5"
+                                }
+                            />
+
+                            <text
+                                x={paddingLeft - 10}
+                                y={y + 4}
+                                textAnchor="end"
+                                fontSize="11"
+                                fill="#94A3B8"
+                            >
+                                {Math.round(max * (1 - line / 3))}
+                            </text>
+                        </g>
                     );
                 })}
+
+
+                {/* Area */}
+
+                {points.length > 1 && (
+                    <path d={areaPath} fill="url(#enrollmentFill)" />
+                )}
 
 
                 {/* Line */}
@@ -1162,7 +1097,7 @@ function EnrollmentChart({
                     d={path}
                     fill="none"
                     stroke="#0F9D8A"
-                    strokeWidth="4"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                 />
@@ -1176,26 +1111,26 @@ function EnrollmentChart({
                         <circle
                             cx={point.x}
                             cy={point.y}
-                            r="7"
+                            r="4.5"
                             fill="#FFFFFF"
                             stroke="#0F9D8A"
-                            strokeWidth="3"
+                            strokeWidth="2.5"
                         />
 
                         <text
                             x={point.x}
-                            y={point.y - 14}
+                            y={point.y - 12}
                             textAnchor="middle"
                             fontSize="11"
                             fontWeight="600"
-                            fill="#111827"
+                            fill="#0F172A"
                         >
                             {point.count}
                         </text>
 
                         <text
                             x={point.x}
-                            y={height - 4}
+                            y={height - 8}
                             textAnchor="middle"
                             fontSize="11"
                             fill="#64748B"
