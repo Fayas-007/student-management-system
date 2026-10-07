@@ -6,9 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.fayas.backend.entity.Enrollment;
 
-public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
+public interface EnrollmentRepository
+        extends JpaRepository<Enrollment, Long> {
 
-    boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
+    boolean existsByStudentIdAndCourseId(
+            Long studentId,
+            Long courseId
+    );
 
     List<Enrollment> findByStudentId(Long studentId);
 }

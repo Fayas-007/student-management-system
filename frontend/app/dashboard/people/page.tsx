@@ -43,6 +43,7 @@ export default function PeoplePage() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("ALL");
@@ -62,8 +63,9 @@ export default function PeoplePage() {
 
     async function loadUsers() {
         try {
-            setLoading(true);
+            setSaving(true);
             setError("");
+            setSuccess("");
 
             const data = await api<User[]>("/api/users");
 

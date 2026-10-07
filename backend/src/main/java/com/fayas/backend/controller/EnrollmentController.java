@@ -44,6 +44,14 @@ public class EnrollmentController {
         return enrollmentService.createEnrollment(request);
     }
 
+    @PutMapping("/{id}")
+    public EnrollmentResponse updateEnrollment(
+            @PathVariable Long id,
+            @RequestBody EnrollmentRequest request) {
+
+        return enrollmentService.updateEnrollment(id, request);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteEnrollment(@PathVariable Long id) {
         enrollmentService.deleteEnrollment(id);

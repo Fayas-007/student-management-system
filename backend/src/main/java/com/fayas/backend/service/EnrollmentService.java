@@ -53,8 +53,7 @@ public class EnrollmentService {
 
         User user = userRepository
                 .findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         String role = user.getRole();
 
@@ -64,8 +63,7 @@ public class EnrollmentService {
 
         Student student = studentRepository
                 .findByUserId(user.getId())
-                .orElseThrow(() ->
-                        new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new RuntimeException("Student profile not found"));
 
         return enrollmentRepository
                 .findByStudentId(student.getId())
@@ -78,8 +76,7 @@ public class EnrollmentService {
 
         Enrollment enrollment = enrollmentRepository
                 .findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Enrollment not found"));
+                .orElseThrow(() -> new RuntimeException("Enrollment not found"));
 
         return toResponse(enrollment);
     }
@@ -90,15 +87,13 @@ public class EnrollmentService {
 
         Enrollment enrollment = enrollmentRepository
                 .findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Enrollment not found"));
+                .orElseThrow(() -> new RuntimeException("Enrollment not found"));
 
         String email = authentication.getName();
 
         User user = userRepository
                 .findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         String role = user.getRole();
 
@@ -108,8 +103,7 @@ public class EnrollmentService {
 
         Student student = studentRepository
                 .findByUserId(user.getId())
-                .orElseThrow(() ->
-                        new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new RuntimeException("Student profile not found"));
 
         if (!enrollment.getStudent().getId().equals(student.getId())) {
             throw new RuntimeException("Access denied");
@@ -123,25 +117,20 @@ public class EnrollmentService {
 
         Student student = studentRepository
                 .findById(request.getStudentId())
-                .orElseThrow(() ->
-                        new RuntimeException("Student not found"));
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
         Course course = courseRepository
                 .findById(request.getCourseId())
-                .orElseThrow(() ->
-                        new RuntimeException("Course not found"));
+                .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        boolean alreadyEnrolled =
-                enrollmentRepository.existsByStudentIdAndCourseId(
-                        request.getStudentId(),
-                        request.getCourseId()
-                );
+        boolean alreadyEnrolled = enrollmentRepository.existsByStudentIdAndCourseId(
+                request.getStudentId(),
+                request.getCourseId());
 
         if (alreadyEnrolled) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Student is already enrolled in this course"
-            );
+                    "Student is already enrolled in this course");
         }
 
         Enrollment enrollment = new Enrollment();
@@ -150,10 +139,47 @@ public class EnrollmentService {
         enrollment.setCourse(course);
         enrollment.setGrade(request.getGrade());
 
-        Enrollment savedEnrollment =
-                enrollmentRepository.save(enrollment);
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
 
         return toResponse(savedEnrollment);
+    }
+
+    public EnrollmentResponse updateEnrollment(
+            Long id,
+            EnrollmentRequest request) {
+
+        Enrollment enrollment = enrollmentRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Enrollment not found"));
+
+        Student student = studentRepository
+                .findById(request.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        Course course = courseRepository
+                .findById(request.getCourseId())
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        boolean alreadyEnrolled = enrollmentRepository.existsByStudentIdAndCourseId(
+                request.getStudentId(),
+                request.getCourseId());
+
+        if (alreadyEnrolled
+                && !(enrollment.getStudent().getId().equals(request.getStudentId())
+                        && enrollment.getCourse().getId().equals(request.getCourseId()))) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Student is already enrolled in this course");
+        }
+
+        enrollment.setStudent(student);
+        enrollment.setCourse(course);
+        enrollment.setGrade(request.getGrade());
+
+        Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
+
+        return toResponse(updatedEnrollment);
     }
 
     public void deleteEnrollment(Long id) {
