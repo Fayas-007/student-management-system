@@ -113,38 +113,38 @@ export default function Home() {
               </p>
 
 
-{/* =========================
-    HERO BUTTONS
-========================= */}
-<div className="mt-8 flex items-center gap-3">
+              {/* =========================
+                    HERO BUTTONS
+                ========================= */}
+              <div className="mt-8 flex items-center gap-3">
 
-  {/* PRIMARY CTA */}
-  <Link
-    href="/register"
-    className="group relative flex h-[46px] min-w-[158px] items-center justify-center gap-3 overflow-hidden rounded-[8px] bg-[#111111] px-6 text-[14px] font-medium tracking-[-0.01em] text-white shadow-[0_4px_14px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-[1px] hover:bg-[#000000] hover:shadow-[0_7px_20px_rgba(0,0,0,0.25)]"
-  >
-    <span className="relative z-10">
-      Get started
-    </span>
+                {/* PRIMARY CTA */}
+                <Link
+                  href="/register"
+                  className="group relative flex h-[46px] min-w-[158px] items-center justify-center gap-3 overflow-hidden rounded-[8px] bg-[#111111] px-6 text-[14px] font-medium tracking-[-0.01em] text-white shadow-[0_4px_14px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-[1px] hover:bg-[#000000] hover:shadow-[0_7px_20px_rgba(0,0,0,0.25)]"
+                >
+                  <span className="relative z-10">
+                    Get started
+                  </span>
 
-    <span className="relative z-10 text-[16px] font-normal leading-none transition-transform duration-300 group-hover:translate-x-1">
-      →
-    </span>
+                  <span className="relative z-10 text-[16px] font-normal leading-none transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
 
-    {/* subtle shine */}
-    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.08] to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-  </Link>
+                  {/* subtle shine */}
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.08] to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                </Link>
 
 
-  {/* SECONDARY CTA */}
-  <Link
-    href="/login"
-    className="flex h-[46px] min-w-[148px] items-center justify-center rounded-[8px] bg-white px-6 text-[14px] font-medium tracking-[-0.01em] text-[#111111] shadow-[0_2px_7px_rgba(0,0,0,0.06)] ring-1 ring-[#d2d0cc] transition-all duration-200 hover:-translate-y-[1px] hover:bg-[#fafafa] hover:ring-[#bdbab5]"
-  >
-    Sign in
-  </Link>
+                {/* SECONDARY CTA */}
+                <Link
+                  href="/login"
+                  className="flex h-[46px] min-w-[148px] items-center justify-center rounded-[8px] bg-white px-6 text-[14px] font-medium tracking-[-0.01em] text-[#111111] shadow-[0_2px_7px_rgba(0,0,0,0.06)] ring-1 ring-[#d2d0cc] transition-all duration-200 hover:-translate-y-[1px] hover:bg-[#fafafa] hover:ring-[#bdbab5]"
+                >
+                  Sign in
+                </Link>
 
-</div>
+              </div>
 
               {/* =========================
                   FEATURE STRIP
