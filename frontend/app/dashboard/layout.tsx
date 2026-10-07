@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+
 import {
     LayoutDashboard,
     Users,
@@ -12,6 +13,8 @@ import {
     User,
     LogOut,
     Building2,
+    Menu,
+    X,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -23,6 +26,7 @@ export default function DashboardLayout({
     const pathname = usePathname();
 
     const [role, setRole] = useState("");
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -34,6 +38,10 @@ export default function DashboardLayout({
 
         setRole(localStorage.getItem("role") ?? "");
     }, [router]);
+
+    useEffect(() => {
+        setMobileSidebarOpen(false);
+    }, [pathname]);
 
     function handleLogout() {
         localStorage.removeItem("token");
@@ -82,36 +90,97 @@ export default function DashboardLayout({
 
     return (
         <main className="min-h-screen bg-[#F4F5F7] text-[#111827] antialiased">
-            <div className="flex min-h-screen w-full">
 
-                {/* Sidebar */}
-                <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[#1E293B] bg-[#0F172A] p-4 md:flex">
+            {/* =========================================================
+                MOBILE HEADER
+            ========================================================= */}
+            <div className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#DCE1E8] bg-white px-4 md:hidden">
 
-                    {/* Brand */}
-                    <div className="mb-6 flex items-center gap-3 border-b border-[#1E293B] px-2 pb-5 pt-1">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
-                            N
-                        </div>
-
-                        <div>
-                            <h1 className="text-[15px] font-semibold tracking-[0.08em] text-white">
-                                NEXORA
-                            </h1>
-
-                            <p className="mt-0.5 text-xs text-[#7F8CA3]">
-                                {portalLabel}
-                            </p>
-                        </div>
+                <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
+                        N
                     </div>
 
-                    {/* Navigation */}
+                    <div>
+                        <h1 className="text-[15px] font-semibold tracking-[0.08em] text-[#111827]">
+                            NEXORA
+                        </h1>
+
+                        <p className="text-[10px] text-[#64748B]">
+                            {portalLabel}
+                        </p>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() => setMobileSidebarOpen(true)}
+                    aria-label="Open navigation"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#DCE1E8] bg-white text-[#334155] transition-colors hover:bg-[#F8FAFC]"
+                >
+                    <Menu className="h-5 w-5" />
+                </button>
+            </div>
+
+            <div className="flex min-h-screen w-full">
+
+                {/* =========================================================
+                    MOBILE SIDEBAR OVERLAY
+                ========================================================= */}
+                {mobileSidebarOpen && (
+                    <div
+                        className="fixed inset-0 z-40 bg-[#0F172A]/40 backdrop-blur-[2px] md:hidden"
+                        onClick={() => setMobileSidebarOpen(false)}
+                        aria-hidden="true"
+                    />
+                )}
+
+                {/* =========================================================
+                    MOBILE SIDEBAR
+                ========================================================= */}
+                <aside
+                    className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-[#1E293B] bg-[#0F172A] p-4 shadow-2xl transition-transform duration-200 ease-out md:hidden ${
+                        mobileSidebarOpen
+                            ? "translate-x-0"
+                            : "-translate-x-full"
+                    }`}
+                >
+                    {/* Mobile Brand */}
+                    <div className="mb-6 flex items-center justify-between border-b border-[#1E293B] px-2 pb-5 pt-1">
+
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
+                                N
+                            </div>
+
+                            <div>
+                                <h1 className="text-[15px] font-semibold tracking-[0.08em] text-white">
+                                    NEXORA
+                                </h1>
+
+                                <p className="mt-0.5 text-xs text-[#7F8CA3]">
+                                    {portalLabel}
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setMobileSidebarOpen(false)}
+                            aria-label="Close navigation"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#94A3B8] transition-colors hover:bg-[#1A2436] hover:text-white"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    {/* Mobile Navigation */}
                     <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
 
                         <SectionLabel first>
                             Main
                         </SectionLabel>
 
-                        {/* Dashboard */}
                         <Link
                             href="/dashboard"
                             className={navClass("/dashboard")}
@@ -122,10 +191,9 @@ export default function DashboardLayout({
                             Dashboard
                         </Link>
 
-                        {/* =========================
+                        {/* =================================================
                             ADMIN / TEACHER
-                        ========================= */}
-
+                        ================================================= */}
                         {!isStudent && (
                             <>
                                 <SectionLabel>
@@ -217,10 +285,230 @@ export default function DashboardLayout({
                             </>
                         )}
 
-                        {/* =========================
+                        {/* =================================================
                             STUDENT
-                        ========================= */}
+                        ================================================= */}
+                        {isStudent && (
+                            <>
+                                <SectionLabel>
+                                    My learning
+                                </SectionLabel>
 
+                                <Link
+                                    href="/dashboard/profile"
+                                    className={navClass(
+                                        "/dashboard/profile"
+                                    )}
+                                >
+                                    <User
+                                        className={iconClass(
+                                            "/dashboard/profile"
+                                        )}
+                                    />
+                                    My Profile
+                                </Link>
+
+                                <Link
+                                    href="/dashboard/courses"
+                                    className={navClass(
+                                        "/dashboard/courses"
+                                    )}
+                                >
+                                    <BookOpen
+                                        className={iconClass(
+                                            "/dashboard/courses"
+                                        )}
+                                    />
+                                    My Courses
+                                </Link>
+
+                                <Link
+                                    href="/dashboard/enrollments"
+                                    className={navClass(
+                                        "/dashboard/enrollments"
+                                    )}
+                                >
+                                    <ClipboardList
+                                        className={iconClass(
+                                            "/dashboard/enrollments"
+                                        )}
+                                    />
+                                    My Enrollments
+                                </Link>
+                            </>
+                        )}
+                    </nav>
+
+                    {/* Mobile Bottom */}
+                    <div className="mt-4 space-y-2 border-t border-[#1E293B] pt-4">
+
+                        <div className="flex items-center gap-3 rounded-lg bg-[#131C2E] px-3 py-2.5">
+
+                            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB]/20 text-xs font-bold text-[#60A5FA]">
+                                {role.charAt(0)}
+
+                                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#131C2E] bg-[#22C55E]" />
+                            </div>
+
+                            <div className="min-w-0">
+                                <p className="text-[11px] text-[#7F8CA3]">
+                                    Signed in as
+                                </p>
+
+                                <p className="truncate text-[13px] font-semibold text-white">
+                                    {roleLabel}
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleLogout}
+                            className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-[#A8B3C7] transition-colors hover:bg-[#2A1A1F] hover:text-[#F87171]"
+                        >
+                            <LogOut className="h-[18px] w-[18px] text-[#64748B] group-hover:text-[#F87171]" />
+                            Log out
+                        </button>
+                    </div>
+                </aside>
+
+                {/* =========================================================
+                    DESKTOP SIDEBAR
+                ========================================================= */}
+                <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[#1E293B] bg-[#0F172A] p-4 md:flex">
+
+                    {/* Brand */}
+                    <div className="mb-6 flex items-center gap-3 border-b border-[#1E293B] px-2 pb-5 pt-1">
+
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
+                            N
+                        </div>
+
+                        <div>
+                            <h1 className="text-[15px] font-semibold tracking-[0.08em] text-white">
+                                NEXORA
+                            </h1>
+
+                            <p className="mt-0.5 text-xs text-[#7F8CA3]">
+                                {portalLabel}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
+
+                        <SectionLabel first>
+                            Main
+                        </SectionLabel>
+
+                        {/* Dashboard */}
+                        <Link
+                            href="/dashboard"
+                            className={navClass("/dashboard")}
+                        >
+                            <LayoutDashboard
+                                className={iconClass("/dashboard")}
+                            />
+                            Dashboard
+                        </Link>
+
+                        {/* =================================================
+                            ADMIN / TEACHER
+                        ================================================= */}
+                        {!isStudent && (
+                            <>
+                                <SectionLabel>
+                                    Manage
+                                </SectionLabel>
+
+                                {/* ADMIN ONLY */}
+                                {isAdmin && (
+                                    <Link
+                                        href="/dashboard/people"
+                                        className={navClass(
+                                            "/dashboard/people"
+                                        )}
+                                    >
+                                        <Users
+                                            className={iconClass(
+                                                "/dashboard/people"
+                                            )}
+                                        />
+                                        People
+                                    </Link>
+                                )}
+
+                                {/* DEPARTMENTS — ADMIN ONLY */}
+                                {isAdmin && (
+                                    <Link
+                                        href="/dashboard/departments"
+                                        className={navClass(
+                                            "/dashboard/departments"
+                                        )}
+                                    >
+                                        <Building2
+                                            className={iconClass(
+                                                "/dashboard/departments"
+                                            )}
+                                        />
+                                        Departments
+                                    </Link>
+                                )}
+
+                                {/* STUDENTS — TEACHER ONLY */}
+                                {isTeacher && (
+                                    <Link
+                                        href="/dashboard/students"
+                                        className={navClass(
+                                            "/dashboard/students"
+                                        )}
+                                    >
+                                        <GraduationCap
+                                            className={iconClass(
+                                                "/dashboard/students"
+                                            )}
+                                        />
+                                        Students
+                                    </Link>
+                                )}
+
+                                {/* COURSES */}
+                                {(isAdmin || isTeacher) && (
+                                    <Link
+                                        href="/dashboard/courses"
+                                        className={navClass(
+                                            "/dashboard/courses"
+                                        )}
+                                    >
+                                        <BookOpen
+                                            className={iconClass(
+                                                "/dashboard/courses"
+                                            )}
+                                        />
+                                        Courses
+                                    </Link>
+                                )}
+
+                                {/* ENROLLMENTS */}
+                                <Link
+                                    href="/dashboard/enrollments"
+                                    className={navClass(
+                                        "/dashboard/enrollments"
+                                    )}
+                                >
+                                    <ClipboardList
+                                        className={iconClass(
+                                            "/dashboard/enrollments"
+                                        )}
+                                    />
+                                    Enrollments
+                                </Link>
+                            </>
+                        )}
+
+                        {/* =================================================
+                            STUDENT
+                        ================================================= */}
                         {isStudent && (
                             <>
                                 <SectionLabel>
@@ -276,6 +564,7 @@ export default function DashboardLayout({
                     <div className="mt-4 space-y-2 border-t border-[#1E293B] pt-4">
 
                         <div className="flex items-center gap-3 rounded-lg bg-[#131C2E] px-3 py-2.5">
+
                             <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB]/20 text-xs font-bold text-[#60A5FA]">
                                 {role.charAt(0)}
 
@@ -303,7 +592,9 @@ export default function DashboardLayout({
                     </div>
                 </aside>
 
-                {/* Content */}
+                {/* =========================================================
+                    CONTENT
+                ========================================================= */}
                 <section className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
                     {children}
                 </section>

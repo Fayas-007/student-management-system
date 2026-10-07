@@ -304,9 +304,9 @@ export default function EnrollmentsPage() {
 
                 </div>
 
-                <h1 className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] sm:text-4xl">
-                    {isStudent ? "My Enrollments" : "Enrollments"}
-                </h1>
+                <h1 className="text-[42px] font-bold leading-[1.05] tracking-[-0.03em] text-[#0F172A] sm:text-[46px]">
+    {isStudent ? "My Enrollments" : "Enrollments"}
+</h1>
 
                 <p className="mt-2 text-sm text-[#64748B]">
                     {isAdmin

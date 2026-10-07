@@ -273,11 +273,11 @@ export default function DepartmentsPage() {
                         <div className="flex items-center gap-3">
 
                             <div>
-                                <h1 className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] sm:text-4xl">
+                                <h1 className="text-[42px] font-bold leading-[1.05] tracking-[-0.03em] text-[#0F172A] sm:text-[46px]">
                                     Departments
                                 </h1>
 
-                                <p className="mt-2 text-sm text-[#64748B]">
+                                <p className="mt-3 text-[15px] leading-6 text-[#64748B] sm:text-base">
                                     View and manage academic departments in NEXORA.
                                 </p>
                             </div>
@@ -433,8 +433,8 @@ export default function DepartmentsPage() {
                                         <tr
                                             key={department.id}
                                             className={`border-b border-[#EEF1F5] transition-colors last:border-b-0 hover:bg-[#F5F8FC] ${index % 2 === 1
-                                                    ? "bg-[#FCFDFE]"
-                                                    : "bg-white"
+                                                ? "bg-[#FCFDFE]"
+                                                : "bg-white"
                                                 }`}
                                         >
 

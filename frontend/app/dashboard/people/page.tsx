@@ -333,7 +333,7 @@ export default function PeoplePage() {
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h1 className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] sm:text-4xl">
+                        <h1 className="text-[42px] font-bold leading-[1.05] tracking-[-0.03em] text-[#0F172A] sm:text-[46px]">
                             People
                         </h1>
 
