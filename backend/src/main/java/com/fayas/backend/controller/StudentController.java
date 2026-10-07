@@ -2,6 +2,7 @@ package com.fayas.backend.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.fayas.backend.dto.request.StudentRequest;
@@ -21,6 +22,11 @@ public class StudentController {
     @GetMapping
     public List<StudentResponse> getAllStudents() {
         return studentService.getAllStudents();
+    }
+
+    @GetMapping("/me")
+    public StudentResponse getMyProfile(Authentication authentication) {
+        return studentService.getMyProfile(authentication);
     }
 
     @GetMapping("/{id}")

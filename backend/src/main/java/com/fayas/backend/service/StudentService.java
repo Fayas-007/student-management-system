@@ -2,20 +2,28 @@ package com.fayas.backend.service;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.fayas.backend.dto.request.StudentRequest;
 import com.fayas.backend.dto.response.StudentResponse;
 import com.fayas.backend.entity.Student;
+import com.fayas.backend.entity.User;
 import com.fayas.backend.repository.StudentRepository;
+import com.fayas.backend.repository.UserRepository;
 
 @Service
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
 
-    public StudentService(StudentRepository studentRepository) {
+    public StudentService(
+            StudentRepository studentRepository,
+            UserRepository userRepository) {
+
         this.studentRepository = studentRepository;
+        this.userRepository = userRepository;
     }
 
     // Get all students
@@ -23,21 +31,22 @@ public class StudentService {
 
         return studentRepository.findAll()
                 .stream()
-                .map(student -> {
-                    StudentResponse response = new StudentResponse();
-
-                    response.setId(student.getId());
-                    response.setFirstName(student.getFirstName());
-                    response.setLastName(student.getLastName());
-                    response.setEmail(student.getEmail());
-                    response.setPhone(student.getPhone());
-                    response.setDateOfBirth(student.getDateOfBirth());
-                    response.setAddress(student.getAddress());
-                    response.setCreatedAt(student.getCreatedAt());
-
-                    return response;
-                })
+                .map(this::toResponse)
                 .toList();
+    }
+
+    // Get logged-in student's profile
+    public StudentResponse getMyProfile(Authentication authentication) {
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Student student = studentRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+
+        return toResponse(student);
     }
 
     // Get one student
@@ -46,18 +55,7 @@ public class StudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow();
 
-        StudentResponse response = new StudentResponse();
-
-        response.setId(student.getId());
-        response.setFirstName(student.getFirstName());
-        response.setLastName(student.getLastName());
-        response.setEmail(student.getEmail());
-        response.setPhone(student.getPhone());
-        response.setDateOfBirth(student.getDateOfBirth());
-        response.setAddress(student.getAddress());
-        response.setCreatedAt(student.getCreatedAt());
-
-        return response;
+        return toResponse(student);
     }
 
     // Create student
@@ -74,22 +72,28 @@ public class StudentService {
 
         Student savedStudent = studentRepository.save(student);
 
-        StudentResponse response = new StudentResponse();
-
-        response.setId(savedStudent.getId());
-        response.setFirstName(savedStudent.getFirstName());
-        response.setLastName(savedStudent.getLastName());
-        response.setEmail(savedStudent.getEmail());
-        response.setPhone(savedStudent.getPhone());
-        response.setDateOfBirth(savedStudent.getDateOfBirth());
-        response.setAddress(savedStudent.getAddress());
-        response.setCreatedAt(savedStudent.getCreatedAt());
-
-        return response;
+        return toResponse(savedStudent);
     }
 
     // Delete student
     public void deleteStudent(Long id) {
         studentRepository.deleteById(id);
+    }
+
+    // Convert Student entity to StudentResponse
+    private StudentResponse toResponse(Student student) {
+
+        StudentResponse response = new StudentResponse();
+
+        response.setId(student.getId());
+        response.setFirstName(student.getFirstName());
+        response.setLastName(student.getLastName());
+        response.setEmail(student.getEmail());
+        response.setPhone(student.getPhone());
+        response.setDateOfBirth(student.getDateOfBirth());
+        response.setAddress(student.getAddress());
+        response.setCreatedAt(student.getCreatedAt());
+
+        return response;
     }
 }
