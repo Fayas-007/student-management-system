@@ -1,24 +1,33 @@
 package com.fayas.backend.config;
 
+import com.fayas.backend.entity.User;
+import com.fayas.backend.repository.UserRepository;
 import com.fayas.backend.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(
+            JwtService jwtService,
+            UserRepository userRepository) {
+
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -41,16 +50,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String email = jwtService.extractEmail(token);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            null
-                    );
+            User user = userRepository.findByEmail(email)
+                    .orElse(null);
 
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(authentication);
+            if (user != null) {
+
+                String role = user.getRole();
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                email,
+                                null,
+                                List.of(
+                                        new SimpleGrantedAuthority(
+                                                "ROLE_" + role
+                                        )
+                                )
+                        );
+
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response);

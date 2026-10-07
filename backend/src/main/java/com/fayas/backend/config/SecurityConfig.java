@@ -23,13 +23,31 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
 
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> {})
             .authorizeHttpRequests(auth -> auth
+
                 .requestMatchers("/api/auth/**").permitAll()
+
+                .requestMatchers("/api/users/**")
+                    .hasRole("ADMIN")
+
+                .requestMatchers("/api/departments/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+
+                .requestMatchers("/api/courses/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+
+                .requestMatchers("/api/enrollments/**")
+                    .hasAnyRole("ADMIN", "TEACHER", "STUDENT")
+
+                .requestMatchers("/api/students/**")
+                    .hasAnyRole("ADMIN", "TEACHER", "STUDENT")
+
                 .anyRequest().authenticated()
             )
             .addFilterBefore(
