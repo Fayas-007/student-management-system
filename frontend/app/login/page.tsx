@@ -1,11 +1,16 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
+
 import { useRouter } from "next/navigation";
+
 import Link from "next/link";
+
 import { ArrowRight } from "lucide-react";
 
 import { api } from "@/lib/api";
+
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 type LoginResponse = {
     token: string;
@@ -16,20 +21,13 @@ type LoginResponse = {
 export default function LoginPage() {
     const router = useRouter();
 
+    const checkingAuth = useAuthRedirect();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
-    // Redirect already logged-in users
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-
-        if (token) {
-            router.replace("/dashboard");
-        }
-    }, [router]);
 
     async function handleSubmit(
         event: FormEvent<HTMLFormElement>
@@ -67,6 +65,20 @@ export default function LoginPage() {
         }
     }
 
+    if (checkingAuth) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#2563EB] text-lg font-bold text-white">
+                        N
+                    </div>
+
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#DCE1E8] border-t-[#2563EB]" />
+                </div>
+            </main>
+        );
+    }
+
     return (
         <main className="min-h-screen bg-[#F8FAFC]">
 
@@ -86,11 +98,13 @@ export default function LoginPage() {
                             href="/"
                             className="inline-flex w-fit items-center gap-3"
                         >
+
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white shadow-[0_8px_20px_rgba(37,99,235,0.25)]">
                                 N
                             </div>
 
                             <div>
+
                                 <span className="block text-lg font-bold tracking-[-0.03em] text-white">
                                     NEXORA
                                 </span>
@@ -98,8 +112,11 @@ export default function LoginPage() {
                                 <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#64748B]">
                                     Student Management
                                 </span>
+
                             </div>
+
                         </Link>
+
 
                         {/* Hero Content */}
 
@@ -117,16 +134,21 @@ export default function LoginPage() {
 
                             </div>
 
+
                             {/* Hero Heading */}
 
                             <h2 className="text-[68px] font-bold leading-[0.94] tracking-[-0.035em] text-white xl:text-[84px] 2xl:text-[94px]">
+
                                 Everything your
+
                                 <br />
 
                                 <span className="text-[#3B82F6]">
                                     institution needs.
                                 </span>
+
                             </h2>
+
 
                             {/* Description */}
 
@@ -135,6 +157,7 @@ export default function LoginPage() {
                                 enrollments through one secure academic
                                 platform.
                             </p>
+
 
                             {/* Supporting Message */}
 
@@ -154,6 +177,7 @@ export default function LoginPage() {
 
                         </div>
 
+
                         {/* Footer */}
 
                         <p className="text-xs text-[#475569]">
@@ -164,6 +188,7 @@ export default function LoginPage() {
                     </div>
 
                 </section>
+
 
                 {/* ==================================================
                     RIGHT LOGIN AREA
@@ -202,6 +227,7 @@ export default function LoginPage() {
 
                         </div>
 
+
                         {/* Heading */}
 
                         <div className="mb-8">
@@ -223,6 +249,7 @@ export default function LoginPage() {
                             </p>
 
                         </div>
+
 
                         {/* Login Card */}
 
@@ -262,6 +289,7 @@ export default function LoginPage() {
 
                                 </div>
 
+
                                 {/* Password */}
 
                                 <div>
@@ -293,6 +321,7 @@ export default function LoginPage() {
 
                             </div>
 
+
                             {/* Error */}
 
                             {error && (
@@ -304,6 +333,7 @@ export default function LoginPage() {
 
                                 </div>
                             )}
+
 
                             {/* Submit */}
 
@@ -327,6 +357,7 @@ export default function LoginPage() {
 
                             </button>
 
+
                             {/* Register */}
 
                             <div className="mt-6 border-t border-[#EEF1F5] pt-6 text-center">
@@ -347,6 +378,7 @@ export default function LoginPage() {
                             </div>
 
                         </form>
+
 
                         {/* Bottom Text */}
 

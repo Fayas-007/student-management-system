@@ -5,9 +5,10 @@ import com.fayas.backend.dto.request.UserRequest;
 import com.fayas.backend.dto.response.LoginResponse;
 import com.fayas.backend.dto.response.UserResponse;
 import com.fayas.backend.entity.Student;
-import com.fayas.backend.repository.StudentRepository;
 import com.fayas.backend.entity.User;
+import com.fayas.backend.repository.StudentRepository;
 import com.fayas.backend.repository.UserRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,66 +21,78 @@ public class AuthService {
     private final JwtService jwtService;
 
     public AuthService(
-    UserRepository userRepository,
-    StudentRepository studentRepository,
-    PasswordEncoder passwordEncoder,
-    JwtService jwtService) {
+            UserRepository userRepository,
+            StudentRepository studentRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
 
-    this.userRepository = userRepository;
-    this.studentRepository = studentRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.jwtService = jwtService;
-}
-    public UserResponse register(UserRequest request) {
-
-    User user = new User();
-
-    user.setEmail(request.getEmail());
-
-    user.setPasswordHash(
-            passwordEncoder.encode(request.getPassword()));
-
-    user.setRole(
-            request.getRole() != null
-                    ? request.getRole()
-                    : "STUDENT");
-
-    User savedUser = userRepository.save(user);
-
-    // Create student profile for STUDENT users
-    if ("STUDENT".equals(savedUser.getRole())) {
-
-        Student student = new Student();
-
-        student.setUser(savedUser);
-        student.setFirstName(request.getFirstName());
-        student.setLastName(request.getLastName());
-        student.setEmail(savedUser.getEmail());
-
-        studentRepository.save(student);
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
-    UserResponse response = new UserResponse();
+    public UserResponse register(UserRequest request) {
 
-    response.setId(savedUser.getId());
-    response.setEmail(savedUser.getEmail());
-    response.setRole(savedUser.getRole());
-    response.setCreatedAt(savedUser.getCreatedAt());
+        User user = new User();
 
-    return response;
-}
+        user.setEmail(request.getEmail());
+
+        user.setPasswordHash(
+                passwordEncoder.encode(request.getPassword())
+        );
+
+        user.setRole(
+                request.getRole() != null
+                        ? request.getRole()
+                        : "STUDENT"
+        );
+
+        User savedUser = userRepository.save(user);
+
+        // Create student profile for STUDENT users
+        if ("STUDENT".equals(savedUser.getRole())) {
+
+            Student student = new Student();
+
+            student.setUser(savedUser);
+            student.setFirstName(request.getFirstName());
+            student.setLastName(request.getLastName());
+            student.setEmail(savedUser.getEmail());
+
+            studentRepository.save(student);
+        }
+
+        UserResponse response = new UserResponse();
+
+        response.setId(savedUser.getId());
+        response.setEmail(savedUser.getEmail());
+        response.setRole(savedUser.getRole());
+        response.setCreatedAt(savedUser.getCreatedAt());
+
+        return response;
+    }
 
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Invalid email or password"
+                        )
+                );
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
                 user.getPasswordHash())) {
-            throw new RuntimeException("Invalid email or password");
+
+            throw new RuntimeException(
+                    "Invalid email or password"
+            );
         }
-        String token = jwtService.generateToken(user.getEmail());
+
+        String token =
+                jwtService.generateToken(user.getEmail());
 
         LoginResponse response = new LoginResponse();
 
@@ -88,6 +101,25 @@ public class AuthService {
         response.setRole(user.getRole());
 
         return response;
+    }
 
+    public UserResponse getCurrentUser(
+            Authentication authentication) {
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found")
+                );
+
+        UserResponse response = new UserResponse();
+
+        response.setId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+        response.setCreatedAt(user.getCreatedAt());
+
+        return response;
     }
 }

@@ -6,6 +6,7 @@ import com.fayas.backend.dto.response.LoginResponse;
 import com.fayas.backend.dto.response.UserResponse;
 import com.fayas.backend.service.AuthService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +20,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> register(
+            @RequestBody UserRequest request) {
+
         UserResponse response = authService.register(request);
 
         return ResponseEntity.ok(response);
@@ -34,4 +37,13 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(
+            Authentication authentication) {
+
+        UserResponse response =
+                authService.getCurrentUser(authentication);
+
+        return ResponseEntity.ok(response);
+    }
 }

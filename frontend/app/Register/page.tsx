@@ -1,14 +1,19 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+
 import { useRouter } from "next/navigation";
+
 import Link from "next/link";
+
 import {
     ArrowRight,
     ShieldCheck,
 } from "lucide-react";
 
 import { api } from "@/lib/api";
+
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 type RegisterResponse = {
     id: number;
@@ -19,6 +24,8 @@ type RegisterResponse = {
 
 export default function RegisterPage() {
     const router = useRouter();
+
+    const checkingAuth = useAuthRedirect();
 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -41,6 +48,7 @@ export default function RegisterPage() {
             setError(
                 "Password must be at least 8 characters."
             );
+
             return;
         }
 
@@ -76,6 +84,20 @@ export default function RegisterPage() {
         } finally {
             setLoading(false);
         }
+    }
+
+    if (checkingAuth) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#2563EB] text-lg font-bold text-white">
+                        N
+                    </div>
+
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#DCE1E8] border-t-[#2563EB]" />
+                </div>
+            </main>
+        );
     }
 
     return (
@@ -116,6 +138,7 @@ export default function RegisterPage() {
 
                         </Link>
 
+
                         {/* Hero Content */}
 
                         <div className="ml-auto w-full max-w-[650px] translate-x-4 pr-4 xl:translate-x-8 xl:pr-6 2xl:translate-x-10">
@@ -132,11 +155,13 @@ export default function RegisterPage() {
 
                             </div>
 
+
                             {/* Hero Heading */}
 
                             <h2 className="text-[68px] font-bold leading-[0.94] tracking-[-0.035em] text-white xl:text-[84px] 2xl:text-[94px]">
 
                                 Start your
+
                                 <br />
 
                                 <span className="text-[#3B82F6]">
@@ -145,6 +170,7 @@ export default function RegisterPage() {
 
                             </h2>
 
+
                             {/* Description */}
 
                             <p className="mt-9 max-w-[560px] text-[16px] leading-7 text-[#94A3B8]">
@@ -152,6 +178,7 @@ export default function RegisterPage() {
                                 access your courses, profile and academic
                                 information from one place.
                             </p>
+
 
                             {/* Supporting Message */}
 
@@ -171,6 +198,7 @@ export default function RegisterPage() {
 
                         </div>
 
+
                         {/* Footer */}
 
                         <p className="text-xs text-[#475569]">
@@ -181,6 +209,7 @@ export default function RegisterPage() {
                     </div>
 
                 </section>
+
 
                 {/* ==================================================
                     RIGHT REGISTER AREA
@@ -219,6 +248,7 @@ export default function RegisterPage() {
 
                         </div>
 
+
                         {/* Heading */}
 
                         <div className="mb-7">
@@ -241,6 +271,7 @@ export default function RegisterPage() {
                             </p>
 
                         </div>
+
 
                         {/* Register Card */}
 
@@ -284,6 +315,7 @@ export default function RegisterPage() {
 
                                     </div>
 
+
                                     <div>
 
                                         <label
@@ -315,6 +347,7 @@ export default function RegisterPage() {
 
                                 </div>
 
+
                                 {/* Email */}
 
                                 <div>
@@ -345,6 +378,7 @@ export default function RegisterPage() {
                                     />
 
                                 </div>
+
 
                                 {/* Password */}
 
@@ -382,6 +416,7 @@ export default function RegisterPage() {
 
                                 </div>
 
+
                                 {/* Confirm Password */}
 
                                 <div>
@@ -416,6 +451,7 @@ export default function RegisterPage() {
 
                             </div>
 
+
                             {/* Error */}
 
                             {error && (
@@ -427,6 +463,7 @@ export default function RegisterPage() {
 
                                 </div>
                             )}
+
 
                             {/* Submit */}
 
@@ -450,6 +487,7 @@ export default function RegisterPage() {
 
                             </button>
 
+
                             {/* Sign In */}
 
                             <div className="mt-6 border-t border-[#EEF1F5] pt-6 text-center">
@@ -470,6 +508,7 @@ export default function RegisterPage() {
                             </div>
 
                         </form>
+
 
                         {/* Security Note */}
 

@@ -2,8 +2,25 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 export default function Home() {
+  const checkingAuth = useAuthRedirect();
+
+  if (checkingAuth) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#2563EB] text-lg font-bold text-white">
+            N
+          </div>
+
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#DCE1E8] border-t-[#2563EB]" />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#f5f3ee] text-[#111111]">
 
@@ -145,6 +162,7 @@ export default function Home() {
                 </Link>
 
               </div>
+
 
               {/* =========================
                   FEATURE STRIP

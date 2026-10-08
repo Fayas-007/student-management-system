@@ -49,9 +49,16 @@ public class SecurityConfig {
                 // AUTHENTICATION
                 // ====================================================
 
+                // Only login and register are public.
                 .requestMatchers(
-                        "/api/auth/**"
+                        "/api/auth/login",
+                        "/api/auth/register"
                 ).permitAll()
+
+                // Requires a valid authenticated user/JWT.
+                .requestMatchers(
+                        "/api/auth/me"
+                ).authenticated()
 
                 // ====================================================
                 // USERS
