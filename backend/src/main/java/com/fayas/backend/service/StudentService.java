@@ -95,10 +95,20 @@ public class StudentService {
 
         // Convert enrolled courses to CourseResponse
         return enrollments
-                .stream()
-                .map(Enrollment::getCourse)
-                .map(this::toCourseResponse)
-                .toList();
+        .stream()
+        .map(enrollment -> {
+            Course course = enrollment.getCourse();
+
+            if (course == null) {
+                throw new RuntimeException(
+                        "Enrollment has no associated course"
+                );
+            }
+
+            return course;
+        })
+        .map(this::toCourseResponse)
+        .toList();
     }
 
     // ============================================================
