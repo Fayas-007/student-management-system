@@ -3,6 +3,7 @@ package com.fayas.backend.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fayas.backend.dto.request.CourseRequest;
 import com.fayas.backend.dto.response.CourseResponse;
@@ -10,19 +11,23 @@ import com.fayas.backend.entity.Course;
 import com.fayas.backend.entity.Department;
 import com.fayas.backend.repository.CourseRepository;
 import com.fayas.backend.repository.DepartmentRepository;
+import com.fayas.backend.repository.EnrollmentRepository;
 
 @Service
 public class CourseService {
 
     private final CourseRepository courseRepository;
     private final DepartmentRepository departmentRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     public CourseService(
             CourseRepository courseRepository,
-            DepartmentRepository departmentRepository) {
+            DepartmentRepository departmentRepository,
+            EnrollmentRepository enrollmentRepository) {
 
         this.courseRepository = courseRepository;
         this.departmentRepository = departmentRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     public List<CourseResponse> getAllCourses() {
@@ -39,6 +44,15 @@ public class CourseService {
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
         return toResponse(course);
+    }
+
+    public long getEnrollmentCount(Long courseId) {
+
+        if (!courseRepository.existsById(courseId)) {
+            throw new RuntimeException("Course not found");
+        }
+
+        return enrollmentRepository.countByCourseId(courseId);
     }
 
     public CourseResponse createCourse(CourseRequest request) {
@@ -63,8 +77,7 @@ public class CourseService {
         course.setDescription(
                 request.getDescription() != null
                         ? request.getDescription().trim()
-                        : null
-        );
+                        : null);
         course.setCredits(request.getCredits());
 
         return toResponse(courseRepository.save(course));
@@ -97,18 +110,22 @@ public class CourseService {
         course.setDescription(
                 request.getDescription() != null
                         ? request.getDescription().trim()
-                        : null
-        );
+                        : null);
         course.setCredits(request.getCredits());
 
         return toResponse(courseRepository.save(course));
     }
 
+    @Transactional
     public void deleteCourse(Long id) {
 
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
+        // Delete all enrollments belonging to this course first
+        enrollmentRepository.deleteByCourseId(id);
+
+        // Then delete the course
         courseRepository.delete(course);
     }
 

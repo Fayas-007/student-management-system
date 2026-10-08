@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import type { Student } from "@/lib/types";
@@ -9,10 +10,16 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [role, setRole] = useState("");
 
   useEffect(() => {
+    setRole(localStorage.getItem("role") ?? "");
+
     async function load() {
       try {
+        setLoading(true);
+        setError("");
+
         setStudents(await api<Student[]>("/api/students"));
       } catch (e) {
         setError(
@@ -26,15 +33,18 @@ export default function StudentsPage() {
     load();
   }, []);
 
+  const isAdmin = role === "ADMIN";
+  const isTeacher = role === "TEACHER";
+
   const filteredStudents = useMemo(() => {
     const query = search.toLowerCase().trim();
 
     if (!query) return students;
 
     return students.filter((student) =>
-      `${student.firstName} ${student.lastName} ${student.email} ${
-        student.phone ?? ""
-      }`
+      `${student.firstName} ${student.lastName} ${
+        student.email
+      } ${student.phone ?? ""}`
         .toLowerCase()
         .includes(query)
     );
@@ -45,126 +55,69 @@ export default function StudentsPage() {
   }
 
   return (
-    <main className="min-h-full">
-
-      {/* =========================
+    <main className="mx-auto w-full max-w-[1400px]">
+      {/* =====================================================
           PAGE HEADER
-      ========================= */}
-      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      ====================================================== */}
 
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#A0A2A8]">
-            Management
-          </p>
+      <div className="mb-8 border-b border-[#DCE1E8] pb-6">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-3 py-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
 
-          <h1 className="text-[30px] font-semibold tracking-[-0.04em] text-[#252832]">
-            Students
-          </h1>
-
-          <p className="mt-2 text-sm text-[#8B8E95]">
-            Manage student profiles and account information.
-          </p>
+          <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
+            {isTeacher ? "Academic Overview" : "Management"}
+          </span>
         </div>
 
-        {/* Add Student */}
-        <button
-          type="button"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1B1C20] px-5 text-sm font-semibold text-white shadow-[0_5px_14px_rgba(27,28,32,0.12)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#292A2E] hover:shadow-[0_8px_18px_rgba(27,28,32,0.16)]"
-        >
-          <span className="text-lg leading-none">+</span>
-          Add student
-        </button>
-
-      </div>
-
-      {/* =========================
-          SUMMARY
-      ========================= */}
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-
-        <div className="rounded-2xl border border-[#E5E2DC] bg-white p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#858890]">
-              Total students
-            </p>
-
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FCE9DF] text-sm font-semibold text-[#9A6752]">
-              S
-            </span>
-          </div>
-
-          <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#252832]">
-            {students.length}
-          </p>
-
-          <p className="mt-1 text-xs text-[#A0A2A8]">
-            Registered student accounts
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[#E5E2DC] bg-white p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#858890]">
-              With phone
-            </p>
-
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F0F1F3] text-sm font-semibold text-[#687080]">
-              #
-            </span>
-          </div>
-
-          <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#252832]">
-            {students.filter((student) => student.phone).length}
-          </p>
-
-          <p className="mt-1 text-xs text-[#A0A2A8]">
-            Profiles with contact numbers
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[#E5E2DC] bg-white p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#858890]">
-              Showing
-            </p>
-
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F0F1F3] text-sm font-semibold text-[#687080]">
-              ≡
-            </span>
-          </div>
-
-          <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#252832]">
-            {filteredStudents.length}
-          </p>
-
-          <p className="mt-1 text-xs text-[#A0A2A8]">
-            Students matching your search
-          </p>
-        </div>
-
-      </div>
-
-      {/* =========================
-          TABLE CARD
-      ========================= */}
-      <section className="overflow-hidden rounded-2xl border border-[#E5E2DC] bg-white shadow-[0_8px_25px_rgba(37,40,50,0.035)]">
-
-        {/* Table Header */}
-        <div className="flex flex-col gap-4 border-b border-[#ECEAE5] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-[#252832]">
+            <h1 className="text-[42px] font-bold leading-[1.05] tracking-[-0.03em] text-[#0F172A] sm:text-[46px]">
+              Students
+            </h1>
+
+            <p className="mt-3 text-[15px] leading-6 text-[#64748B] sm:text-base">
+              {isTeacher
+                ? "View student profiles and account information."
+                : "Manage student profiles and account information."}
+            </p>
+          </div>
+
+          {/* ADMIN ONLY */}
+          {isAdmin && (
+            <Link
+              href="/dashboard/people"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8]"
+            >
+              <span className="text-lg leading-none">+</span>
+              Add Student
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* =====================================================
+          TABLE CARD
+      ====================================================== */}
+
+      <section className="overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
+        {/* TABLE HEADER */}
+
+        <div className="flex flex-col gap-4 border-b border-[#E5E7EB] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-[#111827]">
               Student directory
             </h2>
 
-            <p className="mt-1 text-xs text-[#9A9CA2]">
-              View and manage registered students.
+            <p className="mt-1 text-xs text-[#94A3B8]">
+              {isTeacher
+                ? "View registered students."
+                : "View and manage registered students."}
             </p>
           </div>
 
-          {/* Search */}
-          <div className="relative w-full sm:w-64">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A4A6AB]">
+          {/* SEARCH */}
+          <div className="relative w-full sm:w-72">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]">
               ⌕
             </span>
 
@@ -173,112 +126,120 @@ export default function StudentsPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search students..."
-              className="h-10 w-full rounded-xl border border-[#DDDAD3] bg-[#FBFAF8] pl-9 pr-3 text-sm text-[#252832] placeholder:text-[#A3A5AA] outline-none transition focus:border-[#252832] focus:bg-white focus:ring-4 focus:ring-[#252832]/5"
+              className="h-10 w-full rounded-xl border border-[#DCE1E8] bg-white pl-9 pr-3 text-sm text-[#111827] placeholder:text-[#94A3B8] outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/5"
             />
           </div>
-
         </div>
 
-        {/* Loading */}
+        {/* =================================================
+            LOADING
+        ================================================= */}
+
         {loading && (
           <div className="space-y-4 p-6">
             {[1, 2, 3, 4].map((item) => (
               <div
                 key={item}
-                className="h-14 animate-pulse rounded-xl bg-[#F3F2EE]"
+                className="h-14 animate-pulse rounded-xl bg-[#F1F5F9]"
               />
             ))}
           </div>
         )}
 
-        {/* Error */}
+        {/* =================================================
+            ERROR
+        ================================================= */}
+
         {!loading && error && (
           <div className="p-8 text-center">
-            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-[#FFF1EF] text-[#B94A45]">
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-500">
               !
             </div>
 
-            <h3 className="mt-4 text-sm font-semibold text-[#252832]">
+            <h3 className="mt-4 text-sm font-semibold text-[#111827]">
               Unable to load students
             </h3>
 
-            <p className="mt-1 text-sm text-[#92959C]">
+            <p className="mt-1 text-sm text-[#64748B]">
               {error}
             </p>
           </div>
         )}
 
-        {/* Empty */}
+        {/* =================================================
+            EMPTY
+        ================================================= */}
+
         {!loading &&
           !error &&
           filteredStudents.length === 0 && (
             <div className="px-6 py-16 text-center">
-
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FCE9DF] text-lg font-semibold text-[#9A6752]">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFF6FF] text-lg font-semibold text-[#2563EB]">
                 S
               </div>
 
-              <h3 className="mt-5 text-sm font-semibold text-[#252832]">
-                {search
-                  ? "No students found"
-                  : "No students yet"}
+              <h3 className="mt-5 text-sm font-semibold text-[#111827]">
+                {search ? "No students found" : "No students yet"}
               </h3>
 
-              <p className="mx-auto mt-1 max-w-sm text-sm leading-6 text-[#92959C]">
+              <p className="mx-auto mt-1 max-w-sm text-sm leading-6 text-[#64748B]">
                 {search
                   ? "Try adjusting your search to find a student."
                   : "Students added to the system will appear here."}
               </p>
-
             </div>
           )}
 
-        {/* Desktop Table */}
+        {/* =================================================
+            TABLE
+        ================================================= */}
+
         {!loading &&
           !error &&
           filteredStudents.length > 0 && (
             <div className="overflow-x-auto">
-
               <table className="w-full min-w-[760px] text-left">
-
-                <thead>
-                  <tr className="border-b border-[#ECEAE5] bg-[#FBFAF8]">
-
-                    <th className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#96989F]">
+                <thead className="bg-[#111827]">
+                  <tr>
+                    <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white">
                       Student
                     </th>
 
-                    <th className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#96989F]">
+                    <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white">
                       Email
                     </th>
 
-                    <th className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#96989F]">
+                    <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white">
                       Phone
                     </th>
 
-                    <th className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#96989F]">
+                    <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white">
                       Joined
                     </th>
 
-                    <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-[#96989F]">
-                      Action
-                    </th>
-
+                    {/* ADMIN ONLY */}
+                    {isAdmin && (
+                      <th className="px-5 py-3.5 text-right text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+                        Access
+                      </th>
+                    )}
                   </tr>
                 </thead>
 
                 <tbody>
-                  {filteredStudents.map((student) => (
+                  {filteredStudents.map((student, index) => (
                     <tr
                       key={student.id}
-                      className="group border-b border-[#F0EEE9] transition-colors last:border-b-0 hover:bg-[#FBFAF8]"
+                      className={`border-b border-[#EEF1F5] transition-colors last:border-b-0 hover:bg-[#F5F8FC] ${
+                        index % 2 === 1
+                          ? "bg-[#FCFDFE]"
+                          : "bg-white"
+                      }`}
                     >
-
-                      {/* Student */}
+                      {/* STUDENT */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FCE9DF] text-xs font-semibold text-[#93614D]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EFF6FF] text-xs font-bold text-[#2563EB]">
                             {getInitials(
                               student.firstName,
                               student.lastName
@@ -286,35 +247,34 @@ export default function StudentsPage() {
                           </div>
 
                           <div>
-                            <p className="text-sm font-semibold text-[#252832]">
+                            <p className="text-sm font-semibold tracking-[-0.01em] text-[#111827]">
                               {student.firstName} {student.lastName}
                             </p>
 
-                            <p className="mt-0.5 text-xs text-[#9A9CA2]">
+                            <p className="mt-0.5 text-xs text-[#94A3B8]">
                               Student #{student.id}
                             </p>
                           </div>
-
                         </div>
                       </td>
 
-                      {/* Email */}
+                      {/* EMAIL */}
                       <td className="px-5 py-4">
-                        <span className="text-sm text-[#62666F]">
+                        <span className="text-sm text-[#475569]">
                           {student.email}
                         </span>
                       </td>
 
-                      {/* Phone */}
+                      {/* PHONE */}
                       <td className="px-5 py-4">
-                        <span className="text-sm text-[#62666F]">
+                        <span className="text-sm text-[#475569]">
                           {student.phone ?? "—"}
                         </span>
                       </td>
 
-                      {/* Joined */}
+                      {/* JOINED */}
                       <td className="px-5 py-4">
-                        <span className="text-sm text-[#62666F]">
+                        <span className="text-sm text-[#475569]">
                           {student.createdAt
                             ? new Date(
                                 student.createdAt
@@ -323,34 +283,32 @@ export default function StudentsPage() {
                         </span>
                       </td>
 
-                      {/* Action */}
-                      <td className="px-5 py-4 text-right">
-                        <button
-                          type="button"
-                          className="rounded-lg px-3 py-2 text-xs font-semibold text-[#777A82] opacity-0 transition hover:bg-[#F0EFEB] hover:text-[#252832] group-hover:opacity-100"
-                        >
-                          View
-                        </button>
-                      </td>
-
+                      {/* ADMIN ONLY */}
+                      {isAdmin && (
+                        <td className="px-5 py-4 text-right">
+                          <span className="inline-flex rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-[#2563EB]">
+                            Managed by Admin
+                          </span>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
-
               </table>
-
             </div>
           )}
 
-        {/* Footer */}
+        {/* =================================================
+            FOOTER
+        ================================================= */}
+
         {!loading &&
           !error &&
           filteredStudents.length > 0 && (
-            <div className="flex items-center justify-between border-t border-[#ECEAE5] bg-[#FBFAF8] px-5 py-3">
-
-              <p className="text-xs text-[#999BA1]">
+            <div className="flex items-center justify-between border-t border-[#E5E7EB] bg-[#F8FAFC] px-5 py-3">
+              <p className="text-xs text-[#64748B]">
                 Showing{" "}
-                <span className="font-semibold text-[#656870]">
+                <span className="font-semibold text-[#334155]">
                   {filteredStudents.length}
                 </span>{" "}
                 {filteredStudents.length === 1
@@ -358,15 +316,12 @@ export default function StudentsPage() {
                   : "students"}
               </p>
 
-              <p className="text-xs text-[#B0B1B5]">
+              <p className="text-xs font-medium text-[#94A3B8]">
                 NEXORA
               </p>
-
             </div>
           )}
-
       </section>
-
     </main>
   );
 }

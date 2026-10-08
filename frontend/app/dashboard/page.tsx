@@ -672,10 +672,6 @@ function StudentMetricCard({
         </div>
     );
 }
-/* =========================================================
-   TEACHER DASHBOARD
-========================================================= */
-
 function TeacherDashboard({
     email,
     students,
@@ -687,6 +683,19 @@ function TeacherDashboard({
     courses: Course[];
     enrollments: Enrollment[];
 }) {
+    const gradedEnrollments = enrollments.filter(
+        (enrollment) => enrollment.grade
+    ).length;
+
+    const pendingGrades = enrollments.filter(
+        (enrollment) => !enrollment.grade
+    ).length;
+
+    const gradingPercentage =
+        enrollments.length > 0
+            ? Math.round((gradedEnrollments / enrollments.length) * 100)
+            : 0;
+
     const recentEnrollments = [...enrollments]
         .sort(
             (a, b) =>
@@ -705,305 +714,440 @@ function TeacherDashboard({
             : `Student #${studentId}`;
     }
 
-    function getCourseName(courseId: number) {
-        const course = courses.find(
-            (item) => item.id === courseId
-        );
-
-        return course
-            ? `${course.code} — ${course.name}`
-            : `Course #${courseId}`;
+    function getCourse(courseId: number) {
+        return courses.find((course) => course.id === courseId);
     }
 
     return (
-        <main className="mx-auto w-full max-w-[1400px]">
-            {/* =========================
-                HEADER
-            ========================= */}
+        <div className="mx-auto w-full max-w-[1400px]">
 
-            <header className="mb-8 border-b border-[#DCE1E8] pb-6">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-3 py-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
+            {/* HEADER */}
+            <PageHeader email={email} role="TEACHER" />
 
-                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
-                        Teacher Portal
-                    </span>
-                </div>
-
-                <h1 className="text-[42px] font-bold leading-[1.05] tracking-[-0.03em] text-[#0F172A] sm:text-[46px]">
-                    Teacher Dashboard
-                </h1>
-
-                <p className="mt-3 text-[15px] leading-6 text-[#64748B] sm:text-base">
-                    Welcome back,{" "}
-                    <span className="font-medium text-[#334155]">
-                        {email}
-                    </span>
-                </p>
-            </header>
-
-            {/* =========================
+            {/* =====================================================
                 OVERVIEW
-            ========================= */}
+            ====================================================== */}
 
-            <section className="grid gap-4 sm:grid-cols-3">
-                {/* Students */}
+            {/* =====================================================
+                ACADEMIC SNAPSHOT
+            ====================================================== */}
 
-                <div className="rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-                    <div className="flex items-center justify-between">
+            <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr]">
+
+                {/* STUDENT SNAPSHOT */}
+
+                <div className={`${CARD} p-6`}>
+
+                    <div className="flex items-start justify-between">
+
                         <div>
-                            <p className="text-sm font-medium text-[#64748B]">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#2563EB]">
                                 Students
                             </p>
 
-                            <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#0F172A]">
+                            <h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-[#0F172A]">
+                                Student Snapshot
+                            </h2>
+
+                            <p className="mt-1 text-sm text-[#64748B]">
+                                Current student population.
+                            </p>
+                        </div>
+
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+                            <Users className="h-5 w-5" />
+                        </div>
+
+                    </div>
+
+                    <div className="mt-7 flex items-end justify-between">
+
+                        <div>
+                            <p className="text-4xl font-semibold tracking-[-0.04em] text-[#0F172A]">
                                 {students.length}
                             </p>
+
+                            <p className="mt-1 text-xs text-[#64748B]">
+                                Registered students
+                            </p>
                         </div>
 
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EFF6FF]">
-                            <Users className="h-5 w-5 text-[#2563EB]" />
+                        <GraduationCap className="h-9 w-9 text-[#CBD5E1]" />
+
+                    </div>
+
+                    <div className="mt-6">
+                        <div className="mb-2 flex items-center justify-between">
+                            <span className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">
+                                Student records
+                            </span>
+
+                            <span className="text-xs font-semibold text-[#334155]">
+                                Active
+                            </span>
+                        </div>
+
+                        <div className="h-2 overflow-hidden rounded-full bg-[#F1F5F9]">
+                            <div
+                                className="h-full rounded-full bg-[#2563EB]"
+                                style={{
+                                    width: `${students.length > 0 ? 100 : 0}%`,
+                                }}
+                            />
                         </div>
                     </div>
 
-                    <p className="mt-3 text-xs text-[#94A3B8]">
-                        Registered student profiles
-                    </p>
                 </div>
 
-                {/* Courses */}
+                {/* GRADING STATUS */}
 
-                <div className="rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-                    <div className="flex items-center justify-between">
+                <div className={`${CARD} p-6`}>
+
+                    <div className="flex items-start justify-between">
+
                         <div>
-                            <p className="text-sm font-medium text-[#64748B]">
-                                Courses
+                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0F9D8A]">
+                                Academic
                             </p>
 
-                            <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#0F172A]">
-                                {courses.length}
+                            <h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-[#0F172A]">
+                                Grading Status
+                            </h2>
+
+                            <p className="mt-1 text-sm text-[#64748B]">
+                                Overall enrollment completion.
                             </p>
                         </div>
 
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#ECFDF8]">
-                            <BookOpen className="h-5 w-5 text-[#0F9D8A]" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ECFDF8] text-[#0F9D8A]">
+                            <ShieldCheck className="h-5 w-5" />
                         </div>
+
                     </div>
 
-                    <p className="mt-3 text-xs text-[#94A3B8]">
-                        Courses available in the system
-                    </p>
-                </div>
+                    <div className="mt-7 flex items-end justify-between">
 
-                {/* Enrollments */}
-
-                <div className="rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-                    <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-[#64748B]">
-                                Enrollments
+                            <p className="text-4xl font-semibold tracking-[-0.04em] text-[#0F172A]">
+                                {gradingPercentage}%
                             </p>
 
-                            <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#0F172A]">
-                                {enrollments.length}
+                            <p className="mt-1 text-xs text-[#64748B]">
+                                Enrollment records graded
                             </p>
                         </div>
 
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F5F3FF]">
-                            <ClipboardList className="h-5 w-5 text-[#7C3AED]" />
-                        </div>
+                        <p className="text-sm font-semibold text-[#0F9D8A]">
+                            {gradedEnrollments}/{enrollments.length}
+                        </p>
+
                     </div>
 
-                    <p className="mt-3 text-xs text-[#94A3B8]">
-                        Current student-course enrollments
-                    </p>
+                    <div className="mt-6">
+
+                        <div className="h-2 overflow-hidden rounded-full bg-[#F1F5F9]">
+                            <div
+                                className="h-full rounded-full bg-[#0F9D8A]"
+                                style={{
+                                    width: `${gradingPercentage}%`,
+                                }}
+                            />
+                        </div>
+
+                        <div className="mt-3 flex items-center justify-between text-[11px]">
+                            <span className="text-[#64748B]">
+                                {gradedEnrollments} graded
+                            </span>
+
+                            <span className="font-medium text-[#64748B]">
+                                {pendingGrades} pending
+                            </span>
+                        </div>
+
+                    </div>
+
                 </div>
+
             </section>
 
-            {/* =========================
-                MAIN CONTENT
-            ========================= */}
 
-            <section className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_1fr]">
-                {/* Course Overview */}
+            {/* =====================================================
+                MAIN DASHBOARD
+            ====================================================== */}
 
-                <div className="overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-                    <div className="border-b border-[#E2E8F0] px-6 py-5">
-                        <h2 className="text-base font-semibold text-[#0F172A]">
-                            Course Overview
-                        </h2>
+            <section className="mt-6 grid gap-5 xl:grid-cols-[1.45fr_0.85fr]">
+                {/* COURSE OVERVIEW */}
 
-                        <p className="mt-1 text-sm text-[#64748B]">
-                            Courses currently available to students.
-                        </p>
+                <div className={`${CARD} overflow-hidden`}>
+
+                    <div className="flex items-center justify-between border-b border-[#E2E8F0] px-6 py-5">
+                        <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#2563EB]">
+                                Teaching
+                            </p>
+
+                            <h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-[#0F172A]">
+                                Course Overview
+                            </h2>
+
+                            <p className="mt-1 text-sm text-[#64748B]">
+                                Your current academic courses.
+                            </p>
+                        </div>
+
+                        <Link
+                            href="/dashboard/courses"
+                            className="hidden text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] sm:block"
+                        >
+                            View courses →
+                        </Link>
                     </div>
 
                     {courses.length === 0 ? (
-                        <div className="px-6 py-12 text-center">
-                            <BookOpen className="mx-auto h-8 w-8 text-[#CBD5E1]" />
+                        <div className="flex min-h-[300px] items-center justify-center px-6">
+                            <div className="text-center">
+                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+                                    <BookOpen className="h-5 w-5" />
+                                </div>
 
-                            <p className="mt-3 text-sm font-medium text-[#475569]">
-                                No courses available
-                            </p>
+                                <p className="mt-4 text-sm font-semibold text-[#0F172A]">
+                                    No courses available
+                                </p>
+
+                                <p className="mt-1 text-xs text-[#64748B]">
+                                    Course information will appear here.
+                                </p>
+                            </div>
                         </div>
                     ) : (
-                        <div className="divide-y divide-[#E2E8F0]">
-                            {courses.slice(0, 5).map((course) => (
-                                <div
-                                    key={course.id}
-                                    className="flex items-center justify-between gap-4 px-6 py-4"
-                                >
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-[#0F172A]">
-                                            {course.name}
-                                        </p>
+                        <div>
+                            {courses.slice(0, 5).map((course, index) => {
 
-                                        <p className="mt-1 text-xs font-medium text-[#64748B]">
-                                            {course.code}
-                                        </p>
+                                const courseEnrollments =
+                                    enrollments.filter(
+                                        (item) =>
+                                            item.courseId === course.id
+                                    );
+
+                                const graded =
+                                    courseEnrollments.filter(
+                                        (item) => item.grade
+                                    ).length;
+
+                                const progress =
+                                    courseEnrollments.length > 0
+                                        ? Math.round(
+                                              (graded /
+                                                  courseEnrollments.length) *
+                                                  100
+                                          )
+                                        : 0;
+
+                                return (
+                                    <div
+                                        key={course.id}
+                                        className="group border-b border-[#F1F5F9] px-6 py-5 last:border-b-0"
+                                    >
+                                        <div className="flex items-start gap-4">
+
+                                            {/* COURSE ICON */}
+
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB] transition-colors group-hover:bg-[#DBEAFE]">
+                                                <BookOpen className="h-[18px] w-[18px]" />
+                                            </div>
+
+                                            {/* COURSE INFO */}
+
+                                            <div className="min-w-0 flex-1">
+
+                                                <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+
+                                                    <div>
+                                                        <p className="truncate text-sm font-semibold text-[#0F172A]">
+                                                            {course.name}
+                                                        </p>
+
+                                                        <p className="mt-1 text-xs font-medium text-[#64748B]">
+                                                            {course.code}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3">
+
+                                                        <span className="rounded-lg bg-[#F8FAFC] px-2.5 py-1 text-[11px] font-semibold text-[#64748B]">
+                                                            {course.credits} credits
+                                                        </span>
+
+                                                        <span className="text-xs font-semibold text-[#0F172A]">
+                                                            {courseEnrollments.length}{" "}
+                                                            students
+                                                        </span>
+
+                                                    </div>
+                                                </div>
+
+                                                {/* PROGRESS */}
+
+                                                <div className="mt-4">
+
+                                                    <div className="mb-2 flex items-center justify-between">
+                                                        <span className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">
+                                                            Grading progress
+                                                        </span>
+
+                                                        <span className="text-[11px] font-semibold text-[#334155]">
+                                                            {progress}%
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="h-1.5 overflow-hidden rounded-full bg-[#F1F5F9]">
+                                                        <div
+                                                            className="h-full rounded-full bg-[#2563EB] transition-all"
+                                                            style={{
+                                                                width: `${progress}%`,
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <span className="shrink-0 rounded-lg bg-[#EFF6FF] px-2.5 py-1 text-xs font-semibold text-[#2563EB]">
-                                        {course.credits} credits
-                                    </span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
+
+                    {courses.length > 5 && (
+                        <div className="border-t border-[#E2E8F0] bg-[#F8FAFC] px-6 py-3">
+                            <p className="text-xs text-[#64748B]">
+                                Showing 5 of {courses.length} courses
+                            </p>
+                        </div>
+                    )}
+
                 </div>
 
-                {/* Recent Enrollments */}
+                {/* RECENT ACTIVITY */}
 
-                <div className="overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+                <div className={`${CARD} overflow-hidden`}>
+
                     <div className="border-b border-[#E2E8F0] px-6 py-5">
-                        <h2 className="text-base font-semibold text-[#0F172A]">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0F9D8A]">
+                            Activity
+                        </p>
+
+                        <h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-[#0F172A]">
                             Recent Enrollments
                         </h2>
 
                         <p className="mt-1 text-sm text-[#64748B]">
-                            Latest student-course enrollment activity.
+                            Latest student activity.
                         </p>
                     </div>
 
                     {recentEnrollments.length === 0 ? (
-                        <div className="px-6 py-12 text-center">
-                            <ClipboardList className="mx-auto h-8 w-8 text-[#CBD5E1]" />
+                        <div className="flex min-h-[300px] items-center justify-center px-6">
+                            <div className="text-center">
+                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F5F3FF] text-[#7C3AED]">
+                                    <ClipboardList className="h-5 w-5" />
+                                </div>
 
-                            <p className="mt-3 text-sm font-medium text-[#475569]">
-                                No enrollments yet
-                            </p>
+                                <p className="mt-4 text-sm font-semibold text-[#0F172A]">
+                                    No activity yet
+                                </p>
+
+                                <p className="mt-1 text-xs text-[#64748B]">
+                                    New enrollments will appear here.
+                                </p>
+                            </div>
                         </div>
                     ) : (
-                        <div className="divide-y divide-[#E2E8F0]">
-                            {recentEnrollments.map((enrollment) => (
-                                <div
-                                    key={enrollment.id}
-                                    className="px-6 py-4"
-                                >
-                                    <p className="text-sm font-semibold text-[#0F172A]">
-                                        {getStudentName(
-                                            enrollment.studentId
-                                        )}
-                                    </p>
+                        <div className="px-6 py-2">
 
-                                    <p className="mt-1 truncate text-xs text-[#64748B]">
-                                        {getCourseName(
-                                            enrollment.courseId
-                                        )}
-                                    </p>
+                            {recentEnrollments.map((enrollment) => {
 
-                                    <div className="mt-2 flex items-center justify-between">
-                                        <span className="text-[11px] text-[#94A3B8]">
-                                            {new Date(
-                                                enrollment.enrolledAt
-                                            ).toLocaleDateString()}
-                                        </span>
+                                const course = getCourse(
+                                    enrollment.courseId
+                                );
 
-                                        <span
-                                            className={`rounded-full px-2 py-1 text-[10px] font-semibold ${
-                                                enrollment.grade
-                                                    ? "bg-[#ECFDF8] text-[#087F70]"
-                                                    : "bg-[#EFF6FF] text-[#2563EB]"
-                                            }`}
-                                        >
-                                            {enrollment.grade
-                                                ? `Grade ${enrollment.grade}`
-                                                : "In progress"}
-                                        </span>
+                                return (
+                                    <div
+                                        key={enrollment.id}
+                                        className="relative flex gap-4 border-b border-[#F1F5F9] py-4 last:border-b-0"
+                                    >
+
+                                        {/* TIMELINE */}
+
+                                        <div className="relative flex w-3 shrink-0 justify-center">
+
+                                            <span
+                                                className={`mt-1.5 h-2.5 w-2.5 rounded-full ${
+                                                    enrollment.grade
+                                                        ? "bg-[#0F9D8A]"
+                                                        : "bg-[#2563EB]"
+                                                }`}
+                                            />
+
+                                            <span className="absolute top-4 h-full w-px bg-[#E2E8F0]" />
+                                        </div>
+
+                                        {/* ACTIVITY */}
+
+                                        <div className="min-w-0 flex-1">
+
+                                            <div className="flex items-start justify-between gap-3">
+
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-semibold text-[#0F172A]">
+                                                        {getStudentName(
+                                                            enrollment.studentId
+                                                        )}
+                                                    </p>
+
+                                                    <p className="mt-1 truncate text-xs text-[#64748B]">
+                                                        {course
+                                                            ? `${course.code} — ${course.name}`
+                                                            : `Course #${enrollment.courseId}`}
+                                                    </p>
+                                                </div>
+
+                                                <span
+                                                    className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold ${
+                                                        enrollment.grade
+                                                            ? "bg-[#ECFDF8] text-[#087F70]"
+                                                            : "bg-[#EFF6FF] text-[#1D4ED8]"
+                                                    }`}
+                                                >
+                                                    {enrollment.grade
+                                                        ? `Grade ${enrollment.grade}`
+                                                        : "In progress"}
+                                                </span>
+
+                                            </div>
+
+                                            <p className="mt-2 text-[10px] text-[#94A3B8]">
+                                                {new Date(
+                                                    enrollment.enrolledAt
+                                                ).toLocaleDateString()}
+                                            </p>
+
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
+
                         </div>
                     )}
                 </div>
+
             </section>
 
-            {/* =========================
-                QUICK ACCESS
-            ========================= */}
 
-            <section className="mt-6 grid gap-4 sm:grid-cols-3">
-                <Link
-                    href="/dashboard/students"
-                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)]"
-                >
-                    <div className="flex items-center justify-between">
-                        <GraduationCap className="h-5 w-5 text-[#2563EB]" />
-
-                        <ArrowUpRight className="h-4 w-4 text-[#94A3B8] transition group-hover:text-[#2563EB]" />
-                    </div>
-
-                    <p className="mt-5 text-sm font-semibold text-[#0F172A]">
-                        View Students
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-[#64748B]">
-                        Browse registered student profiles.
-                    </p>
-                </Link>
-
-                <Link
-                    href="/dashboard/courses"
-                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)]"
-                >
-                    <div className="flex items-center justify-between">
-                        <BookOpen className="h-5 w-5 text-[#0F9D8A]" />
-
-                        <ArrowUpRight className="h-4 w-4 text-[#94A3B8] transition group-hover:text-[#2563EB]" />
-                    </div>
-
-                    <p className="mt-5 text-sm font-semibold text-[#0F172A]">
-                        Manage Courses
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-[#64748B]">
-                        Create and update course information.
-                    </p>
-                </Link>
-
-                <Link
-                    href="/dashboard/enrollments"
-                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)]"
-                >
-                    <div className="flex items-center justify-between">
-                        <ClipboardList className="h-5 w-5 text-[#7C3AED]" />
-
-                        <ArrowUpRight className="h-4 w-4 text-[#94A3B8] transition group-hover:text-[#2563EB]" />
-                    </div>
-
-                    <p className="mt-5 text-sm font-semibold text-[#0F172A]">
-                        View Enrollments
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-[#64748B]">
-                        Review student-course enrollment records.
-                    </p>
-                </Link>
-            </section>
-        </main>
+        </div>
     );
 }
-
 /* =========================================================
    ADMIN DASHBOARD
 ========================================================= */

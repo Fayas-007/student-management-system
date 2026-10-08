@@ -2,6 +2,7 @@ package com.fayas.backend.service;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +19,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public UserService(
             UserRepository userRepository,
             StudentRepository studentRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
 
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     // =========================
@@ -65,7 +69,17 @@ public class UserService {
             throw new RuntimeException("Password is required");
         }
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (request.getPassword().length() < 8) {
+            throw new RuntimeException(
+                    "Password must be at least 8 characters."
+            );
+        }
+
+        String email = request.getEmail()
+                .trim()
+                .toLowerCase();
+
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
@@ -73,7 +87,7 @@ public class UserService {
 
         User user = new User();
 
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
         user.setPasswordHash(
                 passwordEncoder.encode(request.getPassword())
         );
@@ -93,83 +107,126 @@ public class UserService {
     // =========================
     public UserResponse updateUser(
             Long id,
-            UserRequest request) {
+            UserRequest request,
+            Authentication authentication) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
+        String oldEmail = user.getEmail();
         String oldRole = user.getRole();
+
+        String newEmail = request.getEmail() != null
+                ? request.getEmail().trim().toLowerCase()
+                : "";
+
         String newRole = normalizeRole(request.getRole());
 
         // =========================
         // ADMIN ROLE PROTECTION
         // =========================
-        if ("ADMIN".equals(oldRole) && !"ADMIN".equals(newRole)) {
-
-            long adminCount = userRepository.findAll()
-                    .stream()
-                    .filter(u -> "ADMIN".equals(u.getRole()))
-                    .count();
-
-            if (adminCount <= 1) {
-                throw new RuntimeException(
-                        "The last administrator cannot be removed. Create another administrator first."
-                );
-            }
+        if ("ADMIN".equals(oldRole)
+                && !"ADMIN".equals(newRole)) {
 
             throw new RuntimeException(
                     "Administrator accounts cannot change to another role."
             );
         }
 
-        // Update email
-        if (request.getEmail() != null
-                && !request.getEmail().isBlank()
-                && !request.getEmail().equals(user.getEmail())) {
+        // =========================
+        // EMAIL
+        // =========================
+        if (newEmail.isBlank()) {
+            throw new RuntimeException("Email is required");
+        }
 
-            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (!newEmail.equalsIgnoreCase(oldEmail)) {
+
+            if (userRepository.findByEmail(newEmail).isPresent()) {
                 throw new RuntimeException("Email already exists");
             }
 
-            user.setEmail(request.getEmail());
+            user.setEmail(newEmail);
         }
 
-        // Update role
+        // =========================
+        // ROLE
+        // =========================
         user.setRole(newRole);
 
-        // Update password only if provided
+        // =========================
+        // PASSWORD
+        // =========================
+        // Blank password during edit = keep existing password
         if (request.getPassword() != null
                 && !request.getPassword().isBlank()) {
 
+            if (request.getPassword().length() < 8) {
+                throw new RuntimeException(
+                        "Password must be at least 8 characters."
+                );
+            }
+
             user.setPasswordHash(
-                    passwordEncoder.encode(request.getPassword())
+                    passwordEncoder.encode(
+                            request.getPassword()
+                    )
             );
         }
 
         User savedUser = userRepository.save(user);
 
+        // =========================
+        // STUDENT PROFILE
+        // =========================
         Student student = studentRepository
                 .findByUserId(savedUser.getId())
                 .orElse(null);
 
-        // STUDENT
         if ("STUDENT".equals(newRole)) {
 
             if (student == null) {
-                createStudentProfile(savedUser, request);
+
+                createStudentProfile(
+                        savedUser,
+                        request
+                );
+
             } else {
-                updateStudentProfile(student, request);
+
+                updateStudentProfile(
+                        student,
+                        request
+                );
             }
 
-        }
-        // STUDENT -> TEACHER / ADMIN
-        else if ("STUDENT".equals(oldRole) && student != null) {
+        } else if ("STUDENT".equals(oldRole)
+                && student != null) {
 
             studentRepository.delete(student);
         }
 
-        return toResponse(savedUser);
+        // =========================
+        // REFRESH JWT IF CURRENT
+        // USER CHANGED EMAIL
+        // =========================
+        UserResponse response = toResponse(savedUser);
+
+        if (authentication != null
+                && authentication.getName()
+                        .equalsIgnoreCase(oldEmail)
+                && !oldEmail.equalsIgnoreCase(
+                        savedUser.getEmail())) {
+
+            response.setToken(
+                    jwtService.generateToken(
+                            savedUser.getEmail()
+                    )
+            );
+        }
+
+        return response;
     }
 
     // =========================
@@ -185,17 +242,6 @@ public class UserService {
         // ADMIN PROTECTION
         // =========================
         if ("ADMIN".equals(user.getRole())) {
-
-            long adminCount = userRepository.findAll()
-                    .stream()
-                    .filter(u -> "ADMIN".equals(u.getRole()))
-                    .count();
-
-            if (adminCount <= 1) {
-                throw new RuntimeException(
-                        "The last administrator cannot be deleted. Create another administrator first."
-                );
-            }
 
             throw new RuntimeException(
                     "Administrator accounts cannot be deleted."

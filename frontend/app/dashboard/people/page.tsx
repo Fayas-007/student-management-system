@@ -9,6 +9,8 @@ type User = {
     role: "ADMIN" | "TEACHER" | "STUDENT";
     createdAt: string;
 
+    token?: string;
+
     studentId?: number;
     firstName?: string;
     lastName?: string;
@@ -63,7 +65,7 @@ export default function PeoplePage() {
 
     async function loadUsers() {
         try {
-            setSaving(true);
+            setLoading(true);
             setError("");
             setSuccess("");
 
@@ -235,10 +237,18 @@ export default function PeoplePage() {
             }
 
             if (editingUser) {
-                await api(`/api/users/${editingUser.id}`, {
-                    method: "PUT",
-                    body: JSON.stringify(payload),
-                });
+                const response = await api<User>(
+                    `/api/users/${editingUser.id}`,
+                    {
+                        method: "PUT",
+                        body: JSON.stringify(payload),
+                    }
+                );
+
+                if (response.token) {
+                    localStorage.setItem("token", response.token);
+                    localStorage.setItem("email", response.email);
+                }
             } else {
                 await api("/api/users", {
                     method: "POST",

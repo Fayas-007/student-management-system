@@ -15,4 +15,8 @@ public interface EnrollmentRepository
     );
 
     List<Enrollment> findByStudentId(Long studentId);
+
+    void deleteByCourseId(Long courseId);
+
+    long countByCourseId(Long courseId);
 }

@@ -28,6 +28,12 @@ public class CourseController {
         return courseService.getCourseById(id);
     }
 
+    // Get number of students enrolled in a course
+    @GetMapping("/{id}/enrollment-count")
+    public long getEnrollmentCount(@PathVariable Long id) {
+        return courseService.getEnrollmentCount(id);
+    }
+
     @PostMapping
     public CourseResponse createCourse(
             @RequestBody CourseRequest request) {

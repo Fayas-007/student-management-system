@@ -2,6 +2,7 @@ package com.fayas.backend.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.fayas.backend.dto.request.UserRequest;
@@ -38,9 +39,14 @@ public class UserController {
     @PutMapping("/{id}")
     public UserResponse updateUser(
             @PathVariable Long id,
-            @RequestBody UserRequest request) {
+            @RequestBody UserRequest request,
+            Authentication authentication) {
 
-        return userService.updateUser(id, request);
+        return userService.updateUser(
+                id,
+                request,
+                authentication
+        );
     }
 
     @DeleteMapping("/{id}")

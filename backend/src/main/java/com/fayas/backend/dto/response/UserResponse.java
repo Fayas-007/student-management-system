@@ -17,6 +17,9 @@ public class UserResponse {
     private LocalDate dateOfBirth;
     private String address;
 
+    // JWT token
+    private String token;
+
     // ID
     public Long getId() {
         return id;
@@ -105,5 +108,14 @@ public class UserResponse {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    // Token
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

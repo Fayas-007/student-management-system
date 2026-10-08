@@ -1,8 +1,11 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+
 import { api } from "@/lib/api";
+
 import type { Course } from "@/lib/types";
+
 import {
     ArrowUpRight,
     Award,
@@ -55,6 +58,12 @@ export default function CoursesPage() {
     const [showModal, setShowModal] = useState(false);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
+    // Delete confirmation modal
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingCourse, setDeletingCourse] = useState<Course | null>(null);
+    const [deleteEnrollmentCount, setDeleteEnrollmentCount] = useState(0);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+
     const [form, setForm] = useState<CourseForm>(emptyForm);
 
     const isStudent = role === "STUDENT";
@@ -80,6 +89,7 @@ export default function CoursesPage() {
              *
              * Students only receive their enrolled courses.
              */
+
             if (currentRole === "STUDENT") {
                 const myCourses = await api<Course[]>(
                     "/api/students/me/courses"
@@ -98,6 +108,7 @@ export default function CoursesPage() {
              *
              * Admin and Teacher can see the complete course directory.
              */
+
             const coursesData = await api<Course[]>("/api/courses");
 
             setCourses(coursesData);
@@ -299,28 +310,67 @@ export default function CoursesPage() {
         }
     }
 
+    /*
+     * ========================================================
+     * DELETE COURSE
+     * ========================================================
+     *
+     * First check how many enrollment records belong to the
+     * course. Then open our custom confirmation modal.
+     *
+     * No browser window.confirm() is used.
+     */
+
     async function handleDelete(course: Course) {
         if (!canManage) return;
-
-        const confirmed = window.confirm(
-            `Delete "${course.name}" (${course.code})?\n\nThis action cannot be undone.`
-        );
-
-        if (!confirmed) return;
 
         try {
             setError("");
             setSuccess("");
 
-            await api(`/api/courses/${course.id}`, {
+            const enrollments = await api<
+                { id: number; courseId: number }[]
+            >("/api/enrollments");
+
+            const enrollmentCount = enrollments.filter(
+                (enrollment) =>
+                    enrollment.courseId === course.id
+            ).length;
+
+            setDeletingCourse(course);
+            setDeleteEnrollmentCount(enrollmentCount);
+            setShowDeleteModal(true);
+        } catch (e) {
+            setError(
+                e instanceof Error
+                    ? e.message
+                    : "Failed to check course enrollments"
+            );
+        }
+    }
+
+    async function confirmDeleteCourse() {
+        if (!deletingCourse) return;
+
+        try {
+            setDeleteLoading(true);
+            setError("");
+            setSuccess("");
+
+            await api(`/api/courses/${deletingCourse.id}`, {
                 method: "DELETE",
             });
 
             setCourses((current) =>
                 current.filter(
-                    (item) => item.id !== course.id
+                    (item) =>
+                        item.id !== deletingCourse.id
                 )
             );
+
+            setShowDeleteModal(false);
+            setDeletingCourse(null);
+            setDeleteEnrollmentCount(0);
 
             setSuccess("Course deleted successfully.");
         } catch (e) {
@@ -329,7 +379,17 @@ export default function CoursesPage() {
                     ? e.message
                     : "Failed to delete course"
             );
+        } finally {
+            setDeleteLoading(false);
         }
+    }
+
+    function closeDeleteModal() {
+        if (deleteLoading) return;
+
+        setShowDeleteModal(false);
+        setDeletingCourse(null);
+        setDeleteEnrollmentCount(0);
     }
 
     /*
@@ -369,6 +429,7 @@ export default function CoursesPage() {
                 <section className="relative overflow-hidden rounded-[28px] bg-[#0F172A] px-6 py-8 shadow-[0_20px_50px_rgba(15,23,42,0.12)] sm:px-8 sm:py-10 lg:px-10">
 
                     {/* Decorative shapes */}
+
                     <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#2563EB]/20 blur-3xl" />
 
                     <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-[#38BDF8]/10 blur-3xl" />
@@ -378,6 +439,7 @@ export default function CoursesPage() {
                         <div className="max-w-2xl">
 
                             {/* Label */}
+
                             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5">
 
                                 <Sparkles className="h-3.5 w-3.5 text-[#60A5FA]" />
@@ -389,16 +451,17 @@ export default function CoursesPage() {
                             </div>
 
                             {/* Heading */}
+
                             <h1 className="text-3xl font-bold leading-tight tracking-[-0.035em] text-white sm:text-4xl lg:text-[48px]">
                                 Keep learning.
                                 <br />
-
                                 <span className="text-[#60A5FA]">
                                     Keep moving forward.
                                 </span>
                             </h1>
 
                             {/* Description */}
+
                             <p className="mt-4 max-w-xl text-sm leading-6 text-[#94A3B8] sm:text-base">
                                 Your enrolled courses, academic progress
                                 and learning resources — all in one place.
@@ -407,6 +470,7 @@ export default function CoursesPage() {
                         </div>
 
                         {/* Course count */}
+
                         <div className="relative w-fit rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 backdrop-blur-sm">
 
                             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">
@@ -433,7 +497,6 @@ export default function CoursesPage() {
 
                 </section>
 
-
                 {/* ==================================================
                     ERROR
                 ================================================== */}
@@ -456,7 +519,6 @@ export default function CoursesPage() {
 
                     </div>
                 )}
-
 
                 {/* ==================================================
                     EMPTY STATE
@@ -526,8 +588,8 @@ export default function CoursesPage() {
 
                             </div>
 
-
                             {/* Course cards */}
+
                             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
 
                                 {courses.map((course, index) => (
@@ -571,7 +633,6 @@ export default function CoursesPage() {
 
                 </div>
 
-
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
                     <div>
@@ -587,7 +648,6 @@ export default function CoursesPage() {
 
                     </div>
 
-
                     {canManage && (
                         <button
                             onClick={openCreateModal}
@@ -600,7 +660,6 @@ export default function CoursesPage() {
                 </div>
 
             </header>
-
 
             {/* SUCCESS MESSAGE */}
 
@@ -623,7 +682,6 @@ export default function CoursesPage() {
                 </div>
             )}
 
-
             {/* ERROR MESSAGE */}
 
             {error && (
@@ -644,7 +702,6 @@ export default function CoursesPage() {
 
                 </div>
             )}
-
 
             {/* FILTERS */}
 
@@ -668,7 +725,6 @@ export default function CoursesPage() {
 
                     </div>
 
-
                     <select
                         value={departmentFilter}
                         onChange={(e) =>
@@ -676,7 +732,6 @@ export default function CoursesPage() {
                         }
                         className="h-11 rounded-xl border border-[#DCE1E8] bg-[#FBFCFE] px-4 text-sm text-[#111827] outline-none transition focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 md:w-64"
                     >
-
                         <option value="">
                             All Departments
                         </option>
@@ -689,13 +744,11 @@ export default function CoursesPage() {
                                 {department.name}
                             </option>
                         ))}
-
                     </select>
 
                 </div>
 
             </section>
-
 
             {/* COURSE TABLE */}
 
@@ -723,7 +776,6 @@ export default function CoursesPage() {
                     </div>
 
                 </div>
-
 
                 {filteredCourses.length === 0 ? (
                     <div className="flex min-h-[280px] flex-col items-center justify-center px-6 text-center">
@@ -786,7 +838,6 @@ export default function CoursesPage() {
 
                             </thead>
 
-
                             <tbody>
 
                                 {filteredCourses.map(
@@ -804,7 +855,6 @@ export default function CoursesPage() {
                                                 {index + 1}
                                             </td>
 
-
                                             <td className="px-4 py-3">
 
                                                 <span className="inline-flex rounded-lg bg-[#EFF6FF] px-2.5 py-1 text-xs font-bold text-[#1D4ED8]">
@@ -812,7 +862,6 @@ export default function CoursesPage() {
                                                 </span>
 
                                             </td>
-
 
                                             <td className="px-4 py-3">
 
@@ -832,7 +881,6 @@ export default function CoursesPage() {
 
                                             </td>
 
-
                                             <td className="px-4 py-3">
 
                                                 <span className="text-sm text-[#475569]">
@@ -843,7 +891,6 @@ export default function CoursesPage() {
 
                                             </td>
 
-
                                             <td className="px-4 py-3">
 
                                                 <span className="text-sm font-medium text-[#111827]">
@@ -851,7 +898,6 @@ export default function CoursesPage() {
                                                 </span>
 
                                             </td>
-
 
                                             <td className="px-4 py-3">
 
@@ -864,7 +910,6 @@ export default function CoursesPage() {
                                                 </span>
 
                                             </td>
-
 
                                             {canManage && (
                                                 <td className="px-4 py-3">
@@ -881,7 +926,6 @@ export default function CoursesPage() {
                                                         >
                                                             Edit
                                                         </button>
-
 
                                                         <button
                                                             onClick={() =>
@@ -912,12 +956,149 @@ export default function CoursesPage() {
 
             </section>
 
+            {/* ========================================================
+                DELETE CONFIRMATION MODAL
+            ======================================================== */}
+
+            {showDeleteModal &&
+                deletingCourse &&
+                canManage && (
+                    <div
+                        className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0F172A]/50 px-4 backdrop-blur-[2px]"
+                        onMouseDown={(event) => {
+                            if (
+                                event.target ===
+                                event.currentTarget
+                            ) {
+                                closeDeleteModal();
+                            }
+                        }}
+                    >
+
+                        <div className="w-full max-w-md overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+
+                            {/* Modal Header */}
+
+                            <div className="border-b border-[#E5E7EB] px-6 py-5">
+
+                                <div className="flex items-start gap-4">
+
+                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FEF2F2]">
+
+                                        <svg
+                                            className="h-5 w-5 text-[#DC2626]"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M12 9v4m0 4h.01M10.29 3.86l-8.2 14A2 2 0 003.82 21h16.36a2 2 0 001.73-3.14l-8.2-14a2 2 0 00-3.42 0z"
+                                            />
+                                        </svg>
+
+                                    </div>
+
+                                    <div>
+
+                                        <h2 className="text-lg font-semibold text-[#111827]">
+                                            Delete Course
+                                        </h2>
+
+                                        <p className="mt-1 text-sm text-[#64748B]">
+                                            This action cannot be undone.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            {/* Modal Body */}
+
+                            <div className="px-6 py-5">
+
+                                <p className="text-sm leading-6 text-[#475569]">
+
+                                    Are you sure you want to delete{" "}
+
+                                    <span className="font-semibold text-[#111827]">
+                                        {deletingCourse.name}
+                                    </span>{" "}
+
+                                    ({deletingCourse.code})?
+
+                                </p>
+
+                                {deleteEnrollmentCount > 0 ? (
+                                    <div className="mt-4 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3">
+
+                                        <p className="text-sm font-semibold text-[#92400E]">
+                                            This course has{" "}
+                                            {deleteEnrollmentCount}{" "}
+                                            enrolled{" "}
+                                            {deleteEnrollmentCount === 1
+                                                ? "student"
+                                                : "students"}
+                                            .
+                                        </p>
+
+                                        <p className="mt-1 text-sm leading-5 text-[#A16207]">
+                                            Deleting this course will
+                                            also remove those enrollment
+                                            records.
+                                        </p>
+
+                                    </div>
+                                ) : (
+                                    <p className="mt-3 text-sm text-[#64748B]">
+                                        No students are currently
+                                        enrolled in this course.
+                                    </p>
+                                )}
+
+                            </div>
+
+                            {/* Modal Actions */}
+
+                            <div className="flex justify-end gap-3 border-t border-[#E5E7EB] bg-[#FAFBFC] px-6 py-4">
+
+                                <button
+                                    type="button"
+                                    onClick={closeDeleteModal}
+                                    disabled={deleteLoading}
+                                    className="rounded-xl border border-[#DCE1E8] bg-white px-4 py-2.5 text-sm font-semibold text-[#475569] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={confirmDeleteCourse}
+                                    disabled={deleteLoading}
+                                    className="rounded-xl bg-[#DC2626] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#B91C1C] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {deleteLoading
+                                        ? "Deleting..."
+                                        : "Delete Course"}
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                )}
 
             {/* ========================================================
-                MODAL
+                ADD / EDIT COURSE MODAL
             ======================================================== */}
 
             {showModal && canManage && (
+
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/45 px-4 py-6 backdrop-blur-[2px]">
 
                     <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
@@ -942,7 +1123,6 @@ export default function CoursesPage() {
 
                             </div>
 
-
                             <button
                                 type="button"
                                 onClick={closeModal}
@@ -953,7 +1133,6 @@ export default function CoursesPage() {
                             </button>
 
                         </div>
-
 
                         {/* Form */}
 
@@ -981,7 +1160,6 @@ export default function CoursesPage() {
 
                                 </div>
                             )}
-
 
                             <div className="grid gap-5 sm:grid-cols-2">
 
@@ -1030,7 +1208,6 @@ export default function CoursesPage() {
 
                                 </div>
 
-
                                 {/* Course Code */}
 
                                 <div>
@@ -1057,7 +1234,6 @@ export default function CoursesPage() {
                                     />
 
                                 </div>
-
 
                                 {/* Credits */}
 
@@ -1086,7 +1262,6 @@ export default function CoursesPage() {
 
                                 </div>
 
-
                                 {/* Name */}
 
                                 <div className="sm:col-span-2">
@@ -1114,7 +1289,6 @@ export default function CoursesPage() {
 
                                 </div>
 
-
                                 {/* Description */}
 
                                 <div className="sm:col-span-2">
@@ -1139,7 +1313,6 @@ export default function CoursesPage() {
                                 </div>
 
                             </div>
-
 
                             {/* Actions */}
 
@@ -1178,7 +1351,6 @@ export default function CoursesPage() {
         </main>
     );
 }
-
 
 /*
  * ============================================================
@@ -1224,7 +1396,6 @@ function StudentCourseCard({
 
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/75 via-[#0F172A]/10 to-transparent" />
 
-
                 {/* Course code */}
 
                 <div className="absolute left-4 top-4">
@@ -1234,7 +1405,6 @@ function StudentCourseCard({
                     </span>
 
                 </div>
-
 
                 {/* Enrolled badge */}
 
@@ -1249,7 +1419,6 @@ function StudentCourseCard({
                     </span>
 
                 </div>
-
 
                 {/* Course title */}
 
@@ -1267,7 +1436,6 @@ function StudentCourseCard({
 
             </div>
 
-
             {/* ==================================================
                 CARD BODY
             ================================================== */}
@@ -1280,7 +1448,6 @@ function StudentCourseCard({
                     {course.description ||
                         "Explore the concepts, skills and knowledge covered in this course."}
                 </p>
-
 
                 {/* Course metadata */}
 
@@ -1306,7 +1473,6 @@ function StudentCourseCard({
 
                     </div>
 
-
                     {/* Status */}
 
                     <div className="flex flex-1 items-center gap-2 rounded-xl bg-[#F8FAFC] px-3 py-2.5">
@@ -1328,7 +1494,6 @@ function StudentCourseCard({
                     </div>
 
                 </div>
-
 
                 {/* View Course */}
 
