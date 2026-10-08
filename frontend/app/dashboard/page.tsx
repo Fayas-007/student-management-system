@@ -164,26 +164,37 @@ export default function DashboardPage() {
         return <DashboardSkeleton />;
     }
 
-    if (role === "STUDENT") {
-        return (
-            <StudentDashboard
-                email={email}
-                courses={courses}
-                enrollments={enrollments}
-            />
-        );
-    }
-
+if (role === "STUDENT") {
     return (
-        <AdminDashboard
+        <StudentDashboard
             email={email}
-            role={role}
-            users={users}
+            courses={courses}
+            enrollments={enrollments}
+        />
+    );
+}
+
+if (role === "TEACHER") {
+    return (
+        <TeacherDashboard
+            email={email}
             students={students}
             courses={courses}
             enrollments={enrollments}
         />
     );
+}
+
+return (
+    <AdminDashboard
+        email={email}
+        role={role}
+        users={users}
+        students={students}
+        courses={courses}
+        enrollments={enrollments}
+    />
+);
 }
 
 
@@ -247,9 +258,7 @@ function PageHeader({ email, role }: { email: string; role: string }) {
             </div>
         </div>
     );
-}
-
-/* =========================================================
+}/* =========================================================
    STUDENT DASHBOARD
 ========================================================= */
 
@@ -262,126 +271,310 @@ function StudentDashboard({
     courses: Course[];
     enrollments: Enrollment[];
 }) {
+    const enrolledCourseIds = new Set(
+        enrollments.map((enrollment) => enrollment.courseId)
+    );
+
+    const myCourses = courses.filter((course) =>
+        enrolledCourseIds.has(course.id)
+    );
+
     return (
-        <div className="mx-auto w-full max-w-[1600px]">
+        <div className="relative -m-4 min-h-screen overflow-hidden sm:-m-6 lg:-m-8">
+            {/* =========================
+                FULL STUDENT DASHBOARD BACKGROUND
+            ========================= */}
+            <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{
+                    backgroundImage: "url('/uni-background.jpeg')",
+                }}
+            />
 
-            <PageHeader email={email} role="STUDENT" />
+            {/* Soft white overlay */}
+            <div className="absolute inset-0 bg-white/15" />
+            {/* =========================
+                DASHBOARD CONTENT
+            ========================= */}
+            <div className="relative z-10 mx-auto w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
 
+                {/* =========================
+                    WELCOME SECTION
+                ========================= */}
+                <section className="overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white/95 backdrop-blur-sm">
+                    <div className="grid min-h-[320px] lg:grid-cols-[1fr_360px]">
 
-            {/* Main Student Metrics */}
-            <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {/* LEFT */}
+                        <div className="flex items-center px-7 py-9 sm:px-10 lg:px-12">
+                            <div className="max-w-xl">
 
-                <StudentMetricCard
-                    label="Available courses"
-                    value={courses.length}
-                    description="Courses available in the system"
-                    accent="blue"
-                    icon={BookOpen}
-                />
+                                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-3 py-1.5">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
 
-                <StudentMetricCard
-                    label="My enrollments"
-                    value={enrollments.length}
-                    description="Your enrollment records"
-                    accent="teal"
-                    icon={ClipboardList}
-                />
+                                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
+                                        Student Portal
+                                    </span>
+                                </div>
 
-                <StudentMetricCard
-                    label="Current role"
-                    valueLabel="STUDENT"
-                    description="Your account role"
-                    accent="coral"
-                    icon={GraduationCap}
-                />
+                                <h1 className="text-[42px] font-bold leading-[1.05] tracking-[-0.035em] text-[#0F172A] sm:text-[50px]">
+                                    Welcome back
+                                </h1>
 
-            </section>
+                                <p className="mt-4 max-w-lg text-[15px] leading-6 text-[#64748B] sm:text-base">
+                                    Stay connected with your courses, academic
+                                    activities and student information from
+                                    one place.
+                                </p>
 
+                                <div className="mt-7 flex items-center gap-3">
+                                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+                                        <BookOpen className="h-5 w-5" />
+                                    </span>
 
-            {/* Student Actions */}
-            <section className="mt-3 grid gap-3 lg:grid-cols-3">
+                                    <div>
+                                        <p className="text-sm font-semibold text-[#0F172A]">
+                                            Your academic journey
+                                        </p>
 
-                <ActionCard
-                    href="/dashboard/profile"
-                    title="My Profile"
-                    description="View and manage your student profile."
-                    cta="View profile"
-                    accent="blue"
-                    icon={UserIcon}
-                />
+                                        <p className="mt-0.5 text-xs text-[#64748B]">
+                                            Everything you need, in one place.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <ActionCard
-                    href="/dashboard/courses"
-                    title="My Courses"
-                    description="Browse available courses and manage your courses."
-                    cta="View courses"
-                    accent="teal"
-                    icon={BookOpen}
-                />
+                        {/* RIGHT — PROFILE */}
+                        <div className="relative min-h-[260px] overflow-hidden border-t border-[#E2E8F0] lg:border-l lg:border-t-0">
+                            {/* Profile background image */}
+                            <img
+                                src="/student-hero.png"
+                                alt=""
+                                className="absolute inset-0 h-full w-full object-cover object-center"
+                            />
 
-                <ActionCard
-                    href="/dashboard/enrollments"
-                    title="My Enrollments"
-                    description="View your course enrollments and grades."
-                    cta="View enrollments"
-                    accent="coral"
-                    icon={ClipboardList}
-                />
+                            {/* Dark soft overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/80 via-[#0F172A]/35 to-[#0F172A]/10" />
 
-            </section>
+                            {/* Profile content */}
+                            <div className="relative z-10 flex h-full min-h-[260px] flex-col justify-end p-7 sm:p-8">
+                                <Link
+                                    href="/dashboard/profile"
+                                    className="group"
+                                >
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white text-[#2563EB] shadow-xl">
+                                        <UserIcon className="h-5 w-5" />
+                                    </div>
 
+                                    <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/70">
+                                        Student Profile
+                                    </p>
 
-            {/* Student Overview */}
-            <section className={`${CARD} mt-3 p-5 sm:p-6`}>
+                                    <p className="mt-1 truncate text-base font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)]">
+                                        {email}
+                                    </p>
 
-                <h2 className="text-base font-semibold text-[#0F172A]">
-                    Student overview
-                </h2>
+                                    <div className="mt-5 flex items-center justify-between border-t border-white/20 pt-4">
+                                        <span className="text-sm font-semibold text-white">
+                                            View profile
+                                        </span>
 
-                <p className="mt-1 text-sm text-[#64748B]">
-                    Your academic information will appear here as you enroll
-                    in courses.
-                </p>
+                                        <ArrowUpRight className="h-4 w-4 text-white/70 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" />
+                                    </div>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {/* =========================
+                    MY COURSES
+                ========================= */}
+                <section className={`${CARD} mt-5 p-5 sm:p-6`}>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#2563EB]">
+                                Academic
+                            </p>
 
-                    <div className="rounded-xl bg-[#F8FAFC] p-5 ring-1 ring-inset ring-[#E2E8F0]">
-                        <p className="text-xs font-medium text-[#64748B]">
-                            Enrollments
-                        </p>
+                            <h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-[#0F172A]">
+                                My Courses
+                            </h2>
 
-                        <p className="mt-2 text-2xl font-semibold tabular-nums text-[#0F172A]">
-                            {enrollments.length}
-                        </p>
+                            <p className="mt-1 text-sm text-[#64748B]">
+                                Your currently enrolled courses.
+                            </p>
+                        </div>
 
-                        <p className="mt-1 text-xs text-[#94A3B8]">
-                            Total courses enrolled
-                        </p>
+                        <Link
+                            href="/dashboard/courses"
+                            className="text-sm font-semibold text-[#2563EB] transition-colors hover:text-[#1D4ED8]"
+                        >
+                            View all →
+                        </Link>
                     </div>
 
-                    <div className="rounded-xl bg-[#F8FAFC] p-5 ring-1 ring-inset ring-[#E2E8F0]">
-                        <p className="text-xs font-medium text-[#64748B]">
-                            Courses
-                        </p>
+                    {myCourses.length === 0 ? (
+                        <div className="mt-5 flex min-h-[190px] flex-col items-center justify-center rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-5 text-center">
+                            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+                                <BookOpen className="h-5 w-5" />
+                            </span>
 
-                        <p className="mt-2 text-2xl font-semibold tabular-nums text-[#0F172A]">
-                            {courses.length}
-                        </p>
+                            <p className="mt-4 text-sm font-semibold text-[#0F172A]">
+                                No courses yet
+                            </p>
 
-                        <p className="mt-1 text-xs text-[#94A3B8]">
-                            Available courses
-                        </p>
-                    </div>
+                            <p className="mt-1 max-w-sm text-xs leading-5 text-[#64748B]">
+                                Your enrolled courses will appear here once
+                                courses have been assigned to you.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="mt-5 grid gap-4 md:grid-cols-2">
+                            {myCourses.slice(0, 4).map((course) => {
+                                const enrollment = enrollments.find(
+                                    (item) => item.courseId === course.id
+                                );
 
-                </div>
+                                const grade = enrollment?.grade;
 
-            </section>
+                                return (
+                                    <div
+                                        key={course.id}
+                                        className="group overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white transition-all hover:-translate-y-0.5 hover:border-[#CBD5E1] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)]"
+                                    >
+                                        <div className="relative h-28 overflow-hidden bg-[#F1F5F9]">
+                                            <div className="absolute inset-0 bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FAFC_55%,#E8EEF8_100%)]" />
 
+                                            <div className="absolute right-[-20px] top-[-35px] h-32 w-32 rounded-full border-[18px] border-white/70" />
+
+                                            <div className="absolute bottom-[-45px] left-[-20px] h-28 w-28 rounded-full border-[15px] border-[#DCE8FA]" />
+
+                                            <div className="absolute left-5 top-5">
+                                                <span className="inline-flex rounded-lg bg-white px-2.5 py-1.5 text-[11px] font-bold tracking-wide text-[#2563EB] shadow-sm">
+                                                    {course.code}
+                                                </span>
+                                            </div>
+
+                                            <div className="absolute bottom-4 right-5 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
+                                                <BookOpen className="h-[18px] w-[18px]" />
+                                            </div>
+                                        </div>
+
+                                        <div className="p-5">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="min-w-0">
+                                                    <h3 className="truncate text-base font-semibold text-[#0F172A]">
+                                                        {course.name}
+                                                    </h3>
+
+                                                    <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#64748B]">
+                                                        {course.description ||
+                                                            "Course information is available here."}
+                                                    </p>
+                                                </div>
+
+                                                <div className="shrink-0 text-right">
+                                                    <p className="text-base font-semibold text-[#0F172A]">
+                                                        {course.credits}
+                                                    </p>
+
+                                                    <p className="text-[10px] uppercase tracking-wide text-[#94A3B8]">
+                                                        Credits
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-5 flex items-center justify-between border-t border-[#F1F5F9] pt-4">
+                                                <div>
+                                                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">
+                                                        Status
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs font-semibold text-[#334155]">
+                                                        {grade
+                                                            ? "Completed"
+                                                            : "In progress"}
+                                                    </p>
+                                                </div>
+
+                                                <div className="text-right">
+                                                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">
+                                                        Grade
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs font-semibold text-[#2563EB]">
+                                                        {grade || "—"}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </section>
+            </div>
         </div>
     );
 }
+/* =========================================================
+   STUDENT RESOURCE CARD
+========================================================= */
 
+function StudentResourceCard({
+    title,
+    description,
+    icon: Icon,
+    href,
+    label,
+}: {
+    title: string;
+    description: string;
+    icon: LucideIcon;
+    href: string;
+    label: string;
+}) {
+    return (
+        <Link
+            href={href}
+            className={`${CARD} group overflow-hidden transition-all hover:-translate-y-0.5 hover:border-[#CBD5E1] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)]`}
+        >
+            <div className="relative h-24 overflow-hidden bg-[#F8FAFC]">
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FAFC_55%,#EEF2F7_100%)]" />
 
+                <div className="absolute right-[-25px] top-[-45px] h-32 w-32 rounded-full border-[18px] border-white/80" />
+
+                <div className="absolute bottom-[-40px] left-[-20px] h-24 w-24 rounded-full border-[14px] border-[#DCE8FA]" />
+
+                <span className="absolute left-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
+                    <Icon className="h-[18px] w-[18px]" />
+                </span>
+            </div>
+
+            <div className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                    <div>
+                        <h3 className="text-base font-semibold text-[#0F172A]">
+                            {title}
+                        </h3>
+
+                        <p className="mt-1.5 text-sm leading-5 text-[#64748B]">
+                            {description}
+                        </p>
+                    </div>
+
+                    <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-[#CBD5E1] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#2563EB]" />
+                </div>
+
+                <p className="mt-5 text-xs font-semibold text-[#2563EB]">
+                    {label} →
+                </p>
+            </div>
+        </Link>
+    );
+}
 /* =========================================================
    ACTION CARD (student quick links)
 ========================================================= */
@@ -450,7 +643,7 @@ function StudentMetricCard({
     value?: number;
     valueLabel?: string;
     description: string;
-    accent: "blue" | "teal" | "coral";
+    accent: "blue" | "teal" | "coral" | "violet";
     icon: LucideIcon;
 }) {
     return (
@@ -479,7 +672,337 @@ function StudentMetricCard({
         </div>
     );
 }
+/* =========================================================
+   TEACHER DASHBOARD
+========================================================= */
 
+function TeacherDashboard({
+    email,
+    students,
+    courses,
+    enrollments,
+}: {
+    email: string;
+    students: Student[];
+    courses: Course[];
+    enrollments: Enrollment[];
+}) {
+    const recentEnrollments = [...enrollments]
+        .sort(
+            (a, b) =>
+                new Date(b.enrolledAt).getTime() -
+                new Date(a.enrolledAt).getTime()
+        )
+        .slice(0, 5);
+
+    function getStudentName(studentId: number) {
+        const student = students.find(
+            (item) => item.id === studentId
+        );
+
+        return student
+            ? `${student.firstName} ${student.lastName}`
+            : `Student #${studentId}`;
+    }
+
+    function getCourseName(courseId: number) {
+        const course = courses.find(
+            (item) => item.id === courseId
+        );
+
+        return course
+            ? `${course.code} — ${course.name}`
+            : `Course #${courseId}`;
+    }
+
+    return (
+        <main className="mx-auto w-full max-w-[1400px]">
+            {/* =========================
+                HEADER
+            ========================= */}
+
+            <header className="mb-8 border-b border-[#DCE1E8] pb-6">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8E3F8] bg-[#EFF6FF] px-3 py-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
+
+                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
+                        Teacher Portal
+                    </span>
+                </div>
+
+                <h1 className="text-[42px] font-bold leading-[1.05] tracking-[-0.03em] text-[#0F172A] sm:text-[46px]">
+                    Teacher Dashboard
+                </h1>
+
+                <p className="mt-3 text-[15px] leading-6 text-[#64748B] sm:text-base">
+                    Welcome back,{" "}
+                    <span className="font-medium text-[#334155]">
+                        {email}
+                    </span>
+                </p>
+            </header>
+
+            {/* =========================
+                OVERVIEW
+            ========================= */}
+
+            <section className="grid gap-4 sm:grid-cols-3">
+                {/* Students */}
+
+                <div className="rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-[#64748B]">
+                                Students
+                            </p>
+
+                            <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#0F172A]">
+                                {students.length}
+                            </p>
+                        </div>
+
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EFF6FF]">
+                            <Users className="h-5 w-5 text-[#2563EB]" />
+                        </div>
+                    </div>
+
+                    <p className="mt-3 text-xs text-[#94A3B8]">
+                        Registered student profiles
+                    </p>
+                </div>
+
+                {/* Courses */}
+
+                <div className="rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-[#64748B]">
+                                Courses
+                            </p>
+
+                            <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#0F172A]">
+                                {courses.length}
+                            </p>
+                        </div>
+
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#ECFDF8]">
+                            <BookOpen className="h-5 w-5 text-[#0F9D8A]" />
+                        </div>
+                    </div>
+
+                    <p className="mt-3 text-xs text-[#94A3B8]">
+                        Courses available in the system
+                    </p>
+                </div>
+
+                {/* Enrollments */}
+
+                <div className="rounded-2xl border border-[#DCE1E8] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-[#64748B]">
+                                Enrollments
+                            </p>
+
+                            <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#0F172A]">
+                                {enrollments.length}
+                            </p>
+                        </div>
+
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F5F3FF]">
+                            <ClipboardList className="h-5 w-5 text-[#7C3AED]" />
+                        </div>
+                    </div>
+
+                    <p className="mt-3 text-xs text-[#94A3B8]">
+                        Current student-course enrollments
+                    </p>
+                </div>
+            </section>
+
+            {/* =========================
+                MAIN CONTENT
+            ========================= */}
+
+            <section className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_1fr]">
+                {/* Course Overview */}
+
+                <div className="overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+                    <div className="border-b border-[#E2E8F0] px-6 py-5">
+                        <h2 className="text-base font-semibold text-[#0F172A]">
+                            Course Overview
+                        </h2>
+
+                        <p className="mt-1 text-sm text-[#64748B]">
+                            Courses currently available to students.
+                        </p>
+                    </div>
+
+                    {courses.length === 0 ? (
+                        <div className="px-6 py-12 text-center">
+                            <BookOpen className="mx-auto h-8 w-8 text-[#CBD5E1]" />
+
+                            <p className="mt-3 text-sm font-medium text-[#475569]">
+                                No courses available
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-[#E2E8F0]">
+                            {courses.slice(0, 5).map((course) => (
+                                <div
+                                    key={course.id}
+                                    className="flex items-center justify-between gap-4 px-6 py-4"
+                                >
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-[#0F172A]">
+                                            {course.name}
+                                        </p>
+
+                                        <p className="mt-1 text-xs font-medium text-[#64748B]">
+                                            {course.code}
+                                        </p>
+                                    </div>
+
+                                    <span className="shrink-0 rounded-lg bg-[#EFF6FF] px-2.5 py-1 text-xs font-semibold text-[#2563EB]">
+                                        {course.credits} credits
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Recent Enrollments */}
+
+                <div className="overflow-hidden rounded-2xl border border-[#DCE1E8] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+                    <div className="border-b border-[#E2E8F0] px-6 py-5">
+                        <h2 className="text-base font-semibold text-[#0F172A]">
+                            Recent Enrollments
+                        </h2>
+
+                        <p className="mt-1 text-sm text-[#64748B]">
+                            Latest student-course enrollment activity.
+                        </p>
+                    </div>
+
+                    {recentEnrollments.length === 0 ? (
+                        <div className="px-6 py-12 text-center">
+                            <ClipboardList className="mx-auto h-8 w-8 text-[#CBD5E1]" />
+
+                            <p className="mt-3 text-sm font-medium text-[#475569]">
+                                No enrollments yet
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-[#E2E8F0]">
+                            {recentEnrollments.map((enrollment) => (
+                                <div
+                                    key={enrollment.id}
+                                    className="px-6 py-4"
+                                >
+                                    <p className="text-sm font-semibold text-[#0F172A]">
+                                        {getStudentName(
+                                            enrollment.studentId
+                                        )}
+                                    </p>
+
+                                    <p className="mt-1 truncate text-xs text-[#64748B]">
+                                        {getCourseName(
+                                            enrollment.courseId
+                                        )}
+                                    </p>
+
+                                    <div className="mt-2 flex items-center justify-between">
+                                        <span className="text-[11px] text-[#94A3B8]">
+                                            {new Date(
+                                                enrollment.enrolledAt
+                                            ).toLocaleDateString()}
+                                        </span>
+
+                                        <span
+                                            className={`rounded-full px-2 py-1 text-[10px] font-semibold ${
+                                                enrollment.grade
+                                                    ? "bg-[#ECFDF8] text-[#087F70]"
+                                                    : "bg-[#EFF6FF] text-[#2563EB]"
+                                            }`}
+                                        >
+                                            {enrollment.grade
+                                                ? `Grade ${enrollment.grade}`
+                                                : "In progress"}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* =========================
+                QUICK ACCESS
+            ========================= */}
+
+            <section className="mt-6 grid gap-4 sm:grid-cols-3">
+                <Link
+                    href="/dashboard/students"
+                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)]"
+                >
+                    <div className="flex items-center justify-between">
+                        <GraduationCap className="h-5 w-5 text-[#2563EB]" />
+
+                        <ArrowUpRight className="h-4 w-4 text-[#94A3B8] transition group-hover:text-[#2563EB]" />
+                    </div>
+
+                    <p className="mt-5 text-sm font-semibold text-[#0F172A]">
+                        View Students
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-[#64748B]">
+                        Browse registered student profiles.
+                    </p>
+                </Link>
+
+                <Link
+                    href="/dashboard/courses"
+                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)]"
+                >
+                    <div className="flex items-center justify-between">
+                        <BookOpen className="h-5 w-5 text-[#0F9D8A]" />
+
+                        <ArrowUpRight className="h-4 w-4 text-[#94A3B8] transition group-hover:text-[#2563EB]" />
+                    </div>
+
+                    <p className="mt-5 text-sm font-semibold text-[#0F172A]">
+                        Manage Courses
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-[#64748B]">
+                        Create and update course information.
+                    </p>
+                </Link>
+
+                <Link
+                    href="/dashboard/enrollments"
+                    className="group rounded-2xl border border-[#DCE1E8] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)]"
+                >
+                    <div className="flex items-center justify-between">
+                        <ClipboardList className="h-5 w-5 text-[#7C3AED]" />
+
+                        <ArrowUpRight className="h-4 w-4 text-[#94A3B8] transition group-hover:text-[#2563EB]" />
+                    </div>
+
+                    <p className="mt-5 text-sm font-semibold text-[#0F172A]">
+                        View Enrollments
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-[#64748B]">
+                        Review student-course enrollment records.
+                    </p>
+                </Link>
+            </section>
+        </main>
+    );
+}
 
 /* =========================================================
    ADMIN DASHBOARD
@@ -561,7 +1084,7 @@ function AdminDashboard({
     );
 
     return (
-       <div className="mx-auto w-full max-w-[1400px] px-8 py-3">
+        <div className="mx-auto w-full max-w-[1400px] px-8 py-3">
 
             <PageHeader email={email} role={role} />
 
@@ -986,7 +1509,7 @@ function EnrollmentChart({
             data.length === 1
                 ? paddingLeft + innerWidth / 2
                 : paddingLeft +
-                  (index / (data.length - 1)) * innerWidth;
+                (index / (data.length - 1)) * innerWidth;
 
         const y = baseline - (item.count / max) * innerHeight;
 

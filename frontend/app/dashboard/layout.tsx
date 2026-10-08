@@ -5,622 +5,616 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 import {
-    LayoutDashboard,
-    Users,
-    GraduationCap,
-    BookOpen,
-    ClipboardList,
-    User,
-    LogOut,
-    Building2,
-    Menu,
-    X,
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  BookOpen,
+  ClipboardList,
+  User,
+  LogOut,
+  Building2,
+  Menu,
+  X,
 } from "lucide-react";
 
 export default function DashboardLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    const router = useRouter();
-    const pathname = usePathname();
+  const router = useRouter();
+  const pathname = usePathname();
 
-    const [role, setRole] = useState("");
-    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [role, setRole] = useState("");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-        if (!token) {
-            router.push("/login");
-            return;
-        }
-
-        setRole(localStorage.getItem("role") ?? "");
-    }, [router]);
-
-    useEffect(() => {
-        setMobileSidebarOpen(false);
-    }, [pathname]);
-
-    function handleLogout() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("email");
-        localStorage.removeItem("role");
-
-        router.push("/login");
+    if (!token) {
+      router.push("/login");
+      return;
     }
 
-    function navClass(path: string) {
-        const active = pathname === path;
+    setRole(localStorage.getItem("role") ?? "");
+  }, [router]);
 
-        return `group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium tracking-[-0.005em] transition-colors
-            ${
-                active
-                    ? "bg-gradient-to-r from-[#2563EB]/20 to-transparent text-white before:absolute before:bottom-2 before:left-0 before:top-2 before:w-[3px] before:rounded-full before:bg-[#3B82F6]"
-                    : "text-[#A8B3C7] hover:bg-[#1A2436] hover:text-white"
-            }`;
-    }
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname]);
 
-    function iconClass(path: string) {
-        const active = pathname === path;
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+    localStorage.removeItem("role");
 
-        return `h-[18px] w-[18px] shrink-0 ${
-            active
-                ? "text-[#60A5FA]"
-                : "text-[#64748B] group-hover:text-[#CBD5E1]"
-        }`;
-    }
+    router.push("/login");
+  }
 
-    const isStudent = role === "STUDENT";
-    const isAdmin = role === "ADMIN";
-    const isTeacher = role === "TEACHER";
+  function navClass(path: string) {
+    const active = pathname === path;
 
-    const roleLabel = role
-        ? role.charAt(0) + role.slice(1).toLowerCase()
-        : "—";
+    return `group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium tracking-[-0.005em] transition-colors
+      ${
+        active
+          ? "bg-gradient-to-r from-[#2563EB]/20 to-transparent text-white before:absolute before:bottom-2 before:left-0 before:top-2 before:w-[3px] before:rounded-full before:bg-[#3B82F6]"
+          : "text-[#A8B3C7] hover:bg-[#1A2436] hover:text-white"
+      }`;
+  }
 
-    const portalLabel = isStudent
-        ? "Student Portal"
-        : isAdmin
-        ? "Admin Console"
-        : isTeacher
+  function iconClass(path: string) {
+    const active = pathname === path;
+
+    return `h-[18px] w-[18px] shrink-0 ${
+      active
+        ? "text-[#60A5FA]"
+        : "text-[#64748B] group-hover:text-[#CBD5E1]"
+    }`;
+  }
+
+  const isStudent = role === "STUDENT";
+  const isAdmin = role === "ADMIN";
+  const isTeacher = role === "TEACHER";
+
+  const roleLabel = role
+    ? role.charAt(0) + role.slice(1).toLowerCase()
+    : "—";
+
+  const portalLabel = isStudent
+    ? "Student Portal"
+    : isAdmin
+      ? "Admin Console"
+      : isTeacher
         ? "Teacher Portal"
         : "Student Management";
 
-    return (
-        <main className="min-h-screen bg-[#F4F5F7] text-[#111827] antialiased">
+  return (
+    <main className="min-h-screen bg-[#F4F5F7] text-[#111827] antialiased">
+      {/* =========================================================
+          MOBILE HEADER
+      ========================================================= */}
 
-            {/* =========================================================
-                MOBILE HEADER
-            ========================================================= */}
-            <div className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#DCE1E8] bg-white px-4 md:hidden">
+      <div className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#DCE1E8] bg-white px-4 md:hidden">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
+            N
+          </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
-                        N
-                    </div>
+          <div>
+            <h1 className="text-[15px] font-semibold tracking-[0.08em] text-[#111827]">
+              NEXORA
+            </h1>
 
-                    <div>
-                        <h1 className="text-[15px] font-semibold tracking-[0.08em] text-[#111827]">
-                            NEXORA
-                        </h1>
+            <p className="text-[10px] text-[#64748B]">{portalLabel}</p>
+          </div>
+        </div>
 
-                        <p className="text-[10px] text-[#64748B]">
-                            {portalLabel}
-                        </p>
-                    </div>
-                </div>
+        <button
+          type="button"
+          onClick={() => setMobileSidebarOpen(true)}
+          aria-label="Open navigation"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#DCE1E8] bg-white text-[#334155] transition-colors hover:bg-[#F8FAFC]"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      </div>
 
-                <button
-                    type="button"
-                    onClick={() => setMobileSidebarOpen(true)}
-                    aria-label="Open navigation"
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#DCE1E8] bg-white text-[#334155] transition-colors hover:bg-[#F8FAFC]"
-                >
-                    <Menu className="h-5 w-5" />
-                </button>
+      <div className="flex min-h-screen w-full">
+        {/* =========================================================
+            MOBILE SIDEBAR OVERLAY
+        ========================================================= */}
+
+        {mobileSidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-[#0F172A]/40 backdrop-blur-[2px] md:hidden"
+            onClick={() => setMobileSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* =========================================================
+            MOBILE SIDEBAR
+        ========================================================= */}
+
+        <aside
+          className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-[#1E293B] bg-[#0F172A] p-4 shadow-2xl transition-transform duration-200 ease-out md:hidden ${
+            mobileSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }`}
+        >
+          {/* Mobile Brand */}
+
+          <div className="mb-6 flex items-center justify-between border-b border-[#1E293B] px-2 pb-5 pt-1">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
+                N
+              </div>
+
+              <div>
+                <h1 className="text-[15px] font-semibold tracking-[0.08em] text-white">
+                  NEXORA
+                </h1>
+
+                <p className="mt-0.5 text-xs text-[#7F8CA3]">
+                  {portalLabel}
+                </p>
+              </div>
             </div>
 
-            <div className="flex min-h-screen w-full">
+            <button
+              type="button"
+              onClick={() => setMobileSidebarOpen(false)}
+              aria-label="Close navigation"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[#94A3B8] transition-colors hover:bg-[#1A2436] hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-                {/* =========================================================
-                    MOBILE SIDEBAR OVERLAY
-                ========================================================= */}
-                {mobileSidebarOpen && (
-                    <div
-                        className="fixed inset-0 z-40 bg-[#0F172A]/40 backdrop-blur-[2px] md:hidden"
-                        onClick={() => setMobileSidebarOpen(false)}
-                        aria-hidden="true"
+          {/* Mobile Navigation */}
+
+          <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
+            {/* =========================
+                MAIN
+            ========================= */}
+
+            <SectionLabel first>Main</SectionLabel>
+
+            {/* Dashboard */}
+
+            <Link
+              href="/dashboard"
+              className={navClass("/dashboard")}
+            >
+              <LayoutDashboard
+                className={iconClass("/dashboard")}
+              />
+              Dashboard
+            </Link>
+
+            {/* Course Catalog — STUDENT ONLY */}
+
+            {isStudent && (
+              <Link
+                href="/dashboard/course-catalog"
+                className={navClass("/dashboard/course-catalog")}
+              >
+                <BookOpen
+                  className={iconClass("/dashboard/course-catalog")}
+                />
+                Course Catalog
+              </Link>
+            )}
+
+            {/* =================================================
+                ADMIN / TEACHER
+            ================================================= */}
+
+            {!isStudent && (
+              <>
+                <SectionLabel>Manage</SectionLabel>
+
+                {/* ADMIN ONLY */}
+
+                {isAdmin && (
+                  <Link
+                    href="/dashboard/people"
+                    className={navClass("/dashboard/people")}
+                  >
+                    <Users
+                      className={iconClass("/dashboard/people")}
                     />
+                    People
+                  </Link>
                 )}
 
-                {/* =========================================================
-                    MOBILE SIDEBAR
-                ========================================================= */}
-                <aside
-                    className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-[#1E293B] bg-[#0F172A] p-4 shadow-2xl transition-transform duration-200 ease-out md:hidden ${
-                        mobileSidebarOpen
-                            ? "translate-x-0"
-                            : "-translate-x-full"
-                    }`}
+                {/* DEPARTMENTS — ADMIN ONLY */}
+
+                {isAdmin && (
+                  <Link
+                    href="/dashboard/departments"
+                    className={navClass(
+                      "/dashboard/departments"
+                    )}
+                  >
+                    <Building2
+                      className={iconClass(
+                        "/dashboard/departments"
+                      )}
+                    />
+                    Departments
+                  </Link>
+                )}
+
+                {/* STUDENTS — TEACHER ONLY */}
+
+                {isTeacher && (
+                  <Link
+                    href="/dashboard/students"
+                    className={navClass("/dashboard/students")}
+                  >
+                    <GraduationCap
+                      className={iconClass(
+                        "/dashboard/students"
+                      )}
+                    />
+                    Students
+                  </Link>
+                )}
+
+                {/* COURSES */}
+
+                {(isAdmin || isTeacher) && (
+                  <Link
+                    href="/dashboard/courses"
+                    className={navClass("/dashboard/courses")}
+                  >
+                    <BookOpen
+                      className={iconClass(
+                        "/dashboard/courses"
+                      )}
+                    />
+                    Courses
+                  </Link>
+                )}
+
+                {/* ENROLLMENTS */}
+
+                <Link
+                  href="/dashboard/enrollments"
+                  className={navClass(
+                    "/dashboard/enrollments"
+                  )}
                 >
-                    {/* Mobile Brand */}
-                    <div className="mb-6 flex items-center justify-between border-b border-[#1E293B] px-2 pb-5 pt-1">
+                  <ClipboardList
+                    className={iconClass(
+                      "/dashboard/enrollments"
+                    )}
+                  />
+                  Enrollments
+                </Link>
+              </>
+            )}
 
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
-                                N
-                            </div>
+            {/* =================================================
+                STUDENT
+            ================================================= */}
 
-                            <div>
-                                <h1 className="text-[15px] font-semibold tracking-[0.08em] text-white">
-                                    NEXORA
-                                </h1>
+            {isStudent && (
+              <>
+                <SectionLabel>My learning</SectionLabel>
 
-                                <p className="mt-0.5 text-xs text-[#7F8CA3]">
-                                    {portalLabel}
-                                </p>
-                            </div>
-                        </div>
+                {/* My Profile */}
 
-                        <button
-                            type="button"
-                            onClick={() => setMobileSidebarOpen(false)}
-                            aria-label="Close navigation"
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#94A3B8] transition-colors hover:bg-[#1A2436] hover:text-white"
-                        >
-                            <X className="h-5 w-5" />
-                        </button>
-                    </div>
+                <Link
+                  href="/dashboard/profile"
+                  className={navClass("/dashboard/profile")}
+                >
+                  <User
+                    className={iconClass(
+                      "/dashboard/profile"
+                    )}
+                  />
+                  My Profile
+                </Link>
 
-                    {/* Mobile Navigation */}
-                    <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
+                {/* My Courses */}
 
-                        <SectionLabel first>
-                            Main
-                        </SectionLabel>
+                <Link
+                  href="/dashboard/courses"
+                  className={navClass("/dashboard/courses")}
+                >
+                  <BookOpen
+                    className={iconClass(
+                      "/dashboard/courses"
+                    )}
+                  />
+                  My Courses
+                </Link>
+              </>
+            )}
+          </nav>
 
-                        <Link
-                            href="/dashboard"
-                            className={navClass("/dashboard")}
-                        >
-                            <LayoutDashboard
-                                className={iconClass("/dashboard")}
-                            />
-                            Dashboard
-                        </Link>
+          {/* Mobile Bottom */}
 
-                        {/* =================================================
-                            ADMIN / TEACHER
-                        ================================================= */}
-                        {!isStudent && (
-                            <>
-                                <SectionLabel>
-                                    Manage
-                                </SectionLabel>
+          <div className="mt-4 space-y-2 border-t border-[#1E293B] pt-4">
+            <div className="flex items-center gap-3 rounded-lg bg-[#131C2E] px-3 py-2.5">
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB]/20 text-xs font-bold text-[#60A5FA]">
+                {role.charAt(0)}
 
-                                {/* ADMIN ONLY */}
-                                {isAdmin && (
-                                    <Link
-                                        href="/dashboard/people"
-                                        className={navClass(
-                                            "/dashboard/people"
-                                        )}
-                                    >
-                                        <Users
-                                            className={iconClass(
-                                                "/dashboard/people"
-                                            )}
-                                        />
-                                        People
-                                    </Link>
-                                )}
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#131C2E] bg-[#22C55E]" />
+              </div>
 
-                                {/* DEPARTMENTS — ADMIN ONLY */}
-                                {isAdmin && (
-                                    <Link
-                                        href="/dashboard/departments"
-                                        className={navClass(
-                                            "/dashboard/departments"
-                                        )}
-                                    >
-                                        <Building2
-                                            className={iconClass(
-                                                "/dashboard/departments"
-                                            )}
-                                        />
-                                        Departments
-                                    </Link>
-                                )}
+              <div className="min-w-0">
+                <p className="text-[11px] text-[#7F8CA3]">
+                  Signed in as
+                </p>
 
-                                {/* STUDENTS — TEACHER ONLY */}
-                                {isTeacher && (
-                                    <Link
-                                        href="/dashboard/students"
-                                        className={navClass(
-                                            "/dashboard/students"
-                                        )}
-                                    >
-                                        <GraduationCap
-                                            className={iconClass(
-                                                "/dashboard/students"
-                                            )}
-                                        />
-                                        Students
-                                    </Link>
-                                )}
-
-                                {/* COURSES */}
-                                {(isAdmin || isTeacher) && (
-                                    <Link
-                                        href="/dashboard/courses"
-                                        className={navClass(
-                                            "/dashboard/courses"
-                                        )}
-                                    >
-                                        <BookOpen
-                                            className={iconClass(
-                                                "/dashboard/courses"
-                                            )}
-                                        />
-                                        Courses
-                                    </Link>
-                                )}
-
-                                {/* ENROLLMENTS */}
-                                <Link
-                                    href="/dashboard/enrollments"
-                                    className={navClass(
-                                        "/dashboard/enrollments"
-                                    )}
-                                >
-                                    <ClipboardList
-                                        className={iconClass(
-                                            "/dashboard/enrollments"
-                                        )}
-                                    />
-                                    Enrollments
-                                </Link>
-                            </>
-                        )}
-
-                        {/* =================================================
-                            STUDENT
-                        ================================================= */}
-                        {isStudent && (
-                            <>
-                                <SectionLabel>
-                                    My learning
-                                </SectionLabel>
-
-                                <Link
-                                    href="/dashboard/profile"
-                                    className={navClass(
-                                        "/dashboard/profile"
-                                    )}
-                                >
-                                    <User
-                                        className={iconClass(
-                                            "/dashboard/profile"
-                                        )}
-                                    />
-                                    My Profile
-                                </Link>
-
-                                <Link
-                                    href="/dashboard/courses"
-                                    className={navClass(
-                                        "/dashboard/courses"
-                                    )}
-                                >
-                                    <BookOpen
-                                        className={iconClass(
-                                            "/dashboard/courses"
-                                        )}
-                                    />
-                                    My Courses
-                                </Link>
-
-                                <Link
-                                    href="/dashboard/enrollments"
-                                    className={navClass(
-                                        "/dashboard/enrollments"
-                                    )}
-                                >
-                                    <ClipboardList
-                                        className={iconClass(
-                                            "/dashboard/enrollments"
-                                        )}
-                                    />
-                                    My Enrollments
-                                </Link>
-                            </>
-                        )}
-                    </nav>
-
-                    {/* Mobile Bottom */}
-                    <div className="mt-4 space-y-2 border-t border-[#1E293B] pt-4">
-
-                        <div className="flex items-center gap-3 rounded-lg bg-[#131C2E] px-3 py-2.5">
-
-                            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB]/20 text-xs font-bold text-[#60A5FA]">
-                                {role.charAt(0)}
-
-                                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#131C2E] bg-[#22C55E]" />
-                            </div>
-
-                            <div className="min-w-0">
-                                <p className="text-[11px] text-[#7F8CA3]">
-                                    Signed in as
-                                </p>
-
-                                <p className="truncate text-[13px] font-semibold text-white">
-                                    {roleLabel}
-                                </p>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={handleLogout}
-                            className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-[#A8B3C7] transition-colors hover:bg-[#2A1A1F] hover:text-[#F87171]"
-                        >
-                            <LogOut className="h-[18px] w-[18px] text-[#64748B] group-hover:text-[#F87171]" />
-                            Log out
-                        </button>
-                    </div>
-                </aside>
-
-                {/* =========================================================
-                    DESKTOP SIDEBAR
-                ========================================================= */}
-                <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[#1E293B] bg-[#0F172A] p-4 md:flex">
-
-                    {/* Brand */}
-                    <div className="mb-6 flex items-center gap-3 border-b border-[#1E293B] px-2 pb-5 pt-1">
-
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
-                            N
-                        </div>
-
-                        <div>
-                            <h1 className="text-[15px] font-semibold tracking-[0.08em] text-white">
-                                NEXORA
-                            </h1>
-
-                            <p className="mt-0.5 text-xs text-[#7F8CA3]">
-                                {portalLabel}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Navigation */}
-                    <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
-
-                        <SectionLabel first>
-                            Main
-                        </SectionLabel>
-
-                        {/* Dashboard */}
-                        <Link
-                            href="/dashboard"
-                            className={navClass("/dashboard")}
-                        >
-                            <LayoutDashboard
-                                className={iconClass("/dashboard")}
-                            />
-                            Dashboard
-                        </Link>
-
-                        {/* =================================================
-                            ADMIN / TEACHER
-                        ================================================= */}
-                        {!isStudent && (
-                            <>
-                                <SectionLabel>
-                                    Manage
-                                </SectionLabel>
-
-                                {/* ADMIN ONLY */}
-                                {isAdmin && (
-                                    <Link
-                                        href="/dashboard/people"
-                                        className={navClass(
-                                            "/dashboard/people"
-                                        )}
-                                    >
-                                        <Users
-                                            className={iconClass(
-                                                "/dashboard/people"
-                                            )}
-                                        />
-                                        People
-                                    </Link>
-                                )}
-
-                                {/* DEPARTMENTS — ADMIN ONLY */}
-                                {isAdmin && (
-                                    <Link
-                                        href="/dashboard/departments"
-                                        className={navClass(
-                                            "/dashboard/departments"
-                                        )}
-                                    >
-                                        <Building2
-                                            className={iconClass(
-                                                "/dashboard/departments"
-                                            )}
-                                        />
-                                        Departments
-                                    </Link>
-                                )}
-
-                                {/* STUDENTS — TEACHER ONLY */}
-                                {isTeacher && (
-                                    <Link
-                                        href="/dashboard/students"
-                                        className={navClass(
-                                            "/dashboard/students"
-                                        )}
-                                    >
-                                        <GraduationCap
-                                            className={iconClass(
-                                                "/dashboard/students"
-                                            )}
-                                        />
-                                        Students
-                                    </Link>
-                                )}
-
-                                {/* COURSES */}
-                                {(isAdmin || isTeacher) && (
-                                    <Link
-                                        href="/dashboard/courses"
-                                        className={navClass(
-                                            "/dashboard/courses"
-                                        )}
-                                    >
-                                        <BookOpen
-                                            className={iconClass(
-                                                "/dashboard/courses"
-                                            )}
-                                        />
-                                        Courses
-                                    </Link>
-                                )}
-
-                                {/* ENROLLMENTS */}
-                                <Link
-                                    href="/dashboard/enrollments"
-                                    className={navClass(
-                                        "/dashboard/enrollments"
-                                    )}
-                                >
-                                    <ClipboardList
-                                        className={iconClass(
-                                            "/dashboard/enrollments"
-                                        )}
-                                    />
-                                    Enrollments
-                                </Link>
-                            </>
-                        )}
-
-                        {/* =================================================
-                            STUDENT
-                        ================================================= */}
-                        {isStudent && (
-                            <>
-                                <SectionLabel>
-                                    My learning
-                                </SectionLabel>
-
-                                <Link
-                                    href="/dashboard/profile"
-                                    className={navClass(
-                                        "/dashboard/profile"
-                                    )}
-                                >
-                                    <User
-                                        className={iconClass(
-                                            "/dashboard/profile"
-                                        )}
-                                    />
-                                    My Profile
-                                </Link>
-
-                                <Link
-                                    href="/dashboard/courses"
-                                    className={navClass(
-                                        "/dashboard/courses"
-                                    )}
-                                >
-                                    <BookOpen
-                                        className={iconClass(
-                                            "/dashboard/courses"
-                                        )}
-                                    />
-                                    My Courses
-                                </Link>
-
-                                <Link
-                                    href="/dashboard/enrollments"
-                                    className={navClass(
-                                        "/dashboard/enrollments"
-                                    )}
-                                >
-                                    <ClipboardList
-                                        className={iconClass(
-                                            "/dashboard/enrollments"
-                                        )}
-                                    />
-                                    My Enrollments
-                                </Link>
-                            </>
-                        )}
-                    </nav>
-
-                    {/* Bottom */}
-                    <div className="mt-4 space-y-2 border-t border-[#1E293B] pt-4">
-
-                        <div className="flex items-center gap-3 rounded-lg bg-[#131C2E] px-3 py-2.5">
-
-                            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB]/20 text-xs font-bold text-[#60A5FA]">
-                                {role.charAt(0)}
-
-                                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#131C2E] bg-[#22C55E]" />
-                            </div>
-
-                            <div className="min-w-0">
-                                <p className="text-[11px] text-[#7F8CA3]">
-                                    Signed in as
-                                </p>
-
-                                <p className="truncate text-[13px] font-semibold text-white">
-                                    {roleLabel}
-                                </p>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={handleLogout}
-                            className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-[#A8B3C7] transition-colors hover:bg-[#2A1A1F] hover:text-[#F87171]"
-                        >
-                            <LogOut className="h-[18px] w-[18px] text-[#64748B] group-hover:text-[#F87171]" />
-                            Log out
-                        </button>
-                    </div>
-                </aside>
-
-                {/* =========================================================
-                    CONTENT
-                ========================================================= */}
-                <section className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
-                    {children}
-                </section>
+                <p className="truncate text-[13px] font-semibold text-white">
+                  {roleLabel}
+                </p>
+              </div>
             </div>
-        </main>
-    );
+
+            <button
+              onClick={handleLogout}
+              className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-[#A8B3C7] transition-colors hover:bg-[#2A1A1F] hover:text-[#F87171]"
+            >
+              <LogOut className="h-[18px] w-[18px] text-[#64748B] group-hover:text-[#F87171]" />
+              Log out
+            </button>
+          </div>
+        </aside>
+
+        {/* =========================================================
+            DESKTOP SIDEBAR
+        ========================================================= */}
+
+        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[#1E293B] bg-[#0F172A] p-4 md:flex">
+          {/* Brand */}
+
+          <div className="mb-6 flex items-center gap-3 border-b border-[#1E293B] px-2 pb-5 pt-1">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-sm font-bold text-white">
+              N
+            </div>
+
+            <div>
+              <h1 className="text-[15px] font-semibold tracking-[0.08em] text-white">
+                NEXORA
+              </h1>
+
+              <p className="mt-0.5 text-xs text-[#7F8CA3]">
+                {portalLabel}
+              </p>
+            </div>
+          </div>
+
+          {/* Navigation */}
+
+          <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
+            {/* =========================
+                MAIN
+            ========================= */}
+
+            <SectionLabel first>Main</SectionLabel>
+
+            {/* Dashboard */}
+
+            <Link
+              href="/dashboard"
+              className={navClass("/dashboard")}
+            >
+              <LayoutDashboard
+                className={iconClass("/dashboard")}
+              />
+              Dashboard
+            </Link>
+
+            {/* Course Catalog — STUDENT ONLY */}
+
+            {isStudent && (
+              <Link
+                href="/dashboard/course-catalog"
+                className={navClass("/dashboard/course-catalog")}
+              >
+                <BookOpen
+                  className={iconClass("/dashboard/course-catalog")}
+                />
+                Course Catalog
+              </Link>
+            )}
+
+            {/* =================================================
+                ADMIN / TEACHER
+            ================================================= */}
+
+            {!isStudent && (
+              <>
+                <SectionLabel>Manage</SectionLabel>
+
+                {/* ADMIN ONLY */}
+
+                {isAdmin && (
+                  <Link
+                    href="/dashboard/people"
+                    className={navClass("/dashboard/people")}
+                  >
+                    <Users
+                      className={iconClass("/dashboard/people")}
+                    />
+                    People
+                  </Link>
+                )}
+
+                {/* DEPARTMENTS — ADMIN ONLY */}
+
+                {isAdmin && (
+                  <Link
+                    href="/dashboard/departments"
+                    className={navClass(
+                      "/dashboard/departments"
+                    )}
+                  >
+                    <Building2
+                      className={iconClass(
+                        "/dashboard/departments"
+                      )}
+                    />
+                    Departments
+                  </Link>
+                )}
+
+                {/* STUDENTS — TEACHER ONLY */}
+
+                {isTeacher && (
+                  <Link
+                    href="/dashboard/students"
+                    className={navClass("/dashboard/students")}
+                  >
+                    <GraduationCap
+                      className={iconClass(
+                        "/dashboard/students"
+                      )}
+                    />
+                    Students
+                  </Link>
+                )}
+
+                {/* COURSES */}
+
+                {(isAdmin || isTeacher) && (
+                  <Link
+                    href="/dashboard/courses"
+                    className={navClass("/dashboard/courses")}
+                  >
+                    <BookOpen
+                      className={iconClass(
+                        "/dashboard/courses"
+                      )}
+                    />
+                    Courses
+                  </Link>
+                )}
+
+                {/* ENROLLMENTS */}
+
+                <Link
+                  href="/dashboard/enrollments"
+                  className={navClass(
+                    "/dashboard/enrollments"
+                  )}
+                >
+                  <ClipboardList
+                    className={iconClass(
+                      "/dashboard/enrollments"
+                    )}
+                  />
+                  Enrollments
+                </Link>
+              </>
+            )}
+
+            {/* =================================================
+                STUDENT
+            ================================================= */}
+
+            {isStudent && (
+              <>
+                <SectionLabel>My learning</SectionLabel>
+
+                {/* My Profile */}
+
+                <Link
+                  href="/dashboard/profile"
+                  className={navClass("/dashboard/profile")}
+                >
+                  <User
+                    className={iconClass(
+                      "/dashboard/profile"
+                    )}
+                  />
+                  My Profile
+                </Link>
+
+                {/* My Courses */}
+
+                <Link
+                  href="/dashboard/courses"
+                  className={navClass("/dashboard/courses")}
+                >
+                  <BookOpen
+                    className={iconClass(
+                      "/dashboard/courses"
+                    )}
+                  />
+                  My Courses
+                </Link>
+              </>
+            )}
+          </nav>
+
+          {/* Bottom */}
+
+          <div className="mt-4 space-y-2 border-t border-[#1E293B] pt-4">
+            <div className="flex items-center gap-3 rounded-lg bg-[#131C2E] px-3 py-2.5">
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB]/20 text-xs font-bold text-[#60A5FA]">
+                {role.charAt(0)}
+
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#131C2E] bg-[#22C55E]" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-[11px] text-[#7F8CA3]">
+                  Signed in as
+                </p>
+
+                <p className="truncate text-[13px] font-semibold text-white">
+                  {roleLabel}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-[#A8B3C7] transition-colors hover:bg-[#2A1A1F] hover:text-[#F87171]"
+            >
+              <LogOut className="h-[18px] w-[18px] text-[#64748B] group-hover:text-[#F87171]" />
+              Log out
+            </button>
+          </div>
+        </aside>
+
+        {/* =========================================================
+            CONTENT
+        ========================================================= */}
+
+        <section className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+          {children}
+        </section>
+      </div>
+    </main>
+  );
 }
 
 function SectionLabel({
-    children,
-    first = false,
+  children,
+  first = false,
 }: {
-    children: React.ReactNode;
-    first?: boolean;
+  children: React.ReactNode;
+  first?: boolean;
 }) {
-    return (
-        <div
-            className={`flex items-center gap-3 px-3 pb-2 ${
-                first ? "" : "pt-6"
-            }`}
-        >
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">
-                {children}
-            </span>
+  return (
+    <div
+      className={`flex items-center gap-3 px-3 pb-2 ${
+        first ? "" : "pt-6"
+      }`}
+    >
+      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+        {children}
+      </span>
 
-            <span className="h-px flex-1 bg-gradient-to-r from-[#1E293B] to-transparent" />
-        </div>
-    );
+      <span className="h-px flex-1 bg-gradient-to-r from-[#1E293B] to-transparent" />
+    </div>
+  );
 }
