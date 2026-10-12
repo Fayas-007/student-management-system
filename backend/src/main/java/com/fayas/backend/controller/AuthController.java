@@ -27,7 +27,7 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
-
+    // docker , cufka and migration script
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @RequestBody LoginRequest request) {
