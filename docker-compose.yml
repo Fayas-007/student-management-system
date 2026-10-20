@@ -1,0 +1,22 @@
+
+services:
+  backend:
+    build: ./backend
+    image: sms-backend
+    container_name: sms-backend-container
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+    image: sms-frontend
+    container_name: sms-frontend-container
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
